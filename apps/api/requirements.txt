@@ -1,0 +1,7 @@
+fastapi==0.139.0
+uvicorn[standard]==0.50.0
+pillow==12.3.0
+pillow-avif-plugin==1.5.5
+numpy==2.5.1
+python-multipart==0.0.32
+slowapi==0.1.10
