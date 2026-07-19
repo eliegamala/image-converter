@@ -1,41 +1,36 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #f6f7f9;
-  --surface: #ffffff;
-  --ink: #12151b;
-  --ink-muted: #5b6270;
-  --border: #e3e5e9;
+  /* Default, daylight surface. */
+  --light-bg: #f6f7fb;
+  --light-surface: #ffffff;
+  --light-ink: #14141f;
+  --light-ink-muted: #5b5f73;
+  --light-border: #e4e4ee;
+
+  /* Used by sections that go on a solid black ground. */
+  --dark-bg: #000000;
+  --dark-surface: #111114;
+  --dark-ink: #f6f7fb;
+  --dark-ink-muted: rgba(246, 247, 251, 0.6);
+  --dark-border: rgba(246, 247, 251, 0.14);
+
+  /* Brand accent - constant across both grounds. */
+  --brand-blue: #0000ff;
+
+  /* Active tokens: default to light, overridden per-section below. */
+  --bg: var(--light-bg);
+  --surface: var(--light-surface);
+  --ink: var(--light-ink);
+  --ink-muted: var(--light-ink-muted);
+  --border: var(--light-border);
+  --primary: var(--brand-blue);
+  --primary-ink: #ffffff;
+  --accent: var(--brand-blue);
   --signal-before: #c2650a;
-  --signal-after: #0aa3a3;
-  --focus: #3b6df0;
-  --danger: #d1433a;
-}
-
-:root[data-theme="dark"] {
-  --bg: #0b0e14;
-  --surface: #12161f;
-  --ink: #eef0f4;
-  --ink-muted: #8a91a3;
-  --border: #232838;
-  --signal-before: #e08a3e;
-  --signal-after: #2fd0d0;
-  --focus: #6f93ff;
-  --danger: #ff6b61;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0b0e14;
-    --surface: #12161f;
-    --ink: #eef0f4;
-    --ink-muted: #8a91a3;
-    --border: #232838;
-    --signal-before: #e08a3e;
-    --signal-after: #2fd0d0;
-    --focus: #6f93ff;
-    --danger: #ff6b61;
-  }
+  --signal-after: var(--brand-blue);
+  --focus: var(--brand-blue);
+  --danger: #c53a3a;
 }
 
 @theme inline {
@@ -44,21 +39,21 @@
   --color-ink: var(--ink);
   --color-ink-muted: var(--ink-muted);
   --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-ink: var(--primary-ink);
+  --color-accent: var(--accent);
   --color-signal-before: var(--signal-before);
   --color-signal-after: var(--signal-after);
   --color-focus: var(--focus);
   --color-danger: var(--danger);
-  --font-display: var(--font-space-grotesk);
+  --font-display: var(--font-shoulders);
+  --font-accent: var(--font-fraunces);
   --font-body: var(--font-inter);
   --font-readout: var(--font-jetbrains-mono);
 }
 
 * {
   border-color: var(--border);
-}
-
-html {
-  color-scheme: light dark;
 }
 
 body {
@@ -71,9 +66,145 @@ body {
   font-family: var(--font-display), var(--font-body), system-ui, sans-serif;
 }
 
+.font-accent {
+  font-family: var(--font-accent), Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--brand-blue);
+}
+
 .font-readout {
   font-family: var(--font-readout), ui-monospace, monospace;
   font-variant-numeric: tabular-nums;
+}
+
+/* Sections that sit on a solid black ground - light ink. Applying this
+   re-points the same --ink/--surface/--border tokens every component
+   already reads, so nested content re-themes automatically instead of
+   needing dark-mode variants hand-written per component. */
+.on-dark {
+  --bg: var(--dark-bg);
+  --surface: var(--dark-surface);
+  --ink: var(--dark-ink);
+  --ink-muted: var(--dark-ink-muted);
+  --border: var(--dark-border);
+  background-color: var(--bg);
+  color: var(--ink);
+}
+
+/* The inverse: forces light tokens back on, for a card (like the tool
+   itself) that should always read as a light surface even when it's
+   nested inside an .on-dark section. */
+.on-light {
+  --bg: var(--light-bg);
+  --surface: var(--light-surface);
+  --ink: var(--light-ink);
+  --ink-muted: var(--light-ink-muted);
+  --border: var(--light-border);
+  color: var(--ink);
+}
+
+/* The hero band - plain black, no pattern or gradient. */
+.hero-dark {
+  --bg: var(--dark-bg);
+  --surface: var(--dark-surface);
+  --ink: var(--dark-ink);
+  --ink-muted: var(--dark-ink-muted);
+  --border: var(--dark-border);
+  background-color: var(--dark-bg);
+  color: var(--ink);
+}
+
+.dashed-pill {
+  border: 2px dashed color-mix(in srgb, var(--ink) 25%, transparent);
+  border-radius: 999px;
+}
+
+/* Interactive pill used for conversion links (Popular Converters, Related
+   conversions, the All Converters index) - reads as a real control, not a
+   plain hyperlink: it lifts and fills with the brand color on hover, and
+   presses back down on click. */
+.conversion-pill {
+  display: inline-block;
+  color: var(--ink-muted);
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
+}
+
+.conversion-pill:hover {
+  color: var(--primary-ink);
+  background-color: var(--primary);
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--primary) 55%, transparent);
+}
+
+.conversion-pill:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* Line-by-line reveal used by the hero headline. */
+.reveal-row {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.2em;
+  margin-bottom: -0.2em;
+}
+
+.reveal-row > span {
+  display: block;
+  transform: translateY(112%);
+  animation: reveal-rise 0.85s cubic-bezier(0.22, 0.8, 0.24, 1) forwards;
+}
+
+@keyframes reveal-rise {
+  to {
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-row > span {
+    animation: none;
+    transform: none;
+  }
+}
+
+/* A row that inverts from dark ground to a light card on hover/focus, used
+   by the capability list and "Why Choose Us". */
+.flip-row {
+  position: relative;
+  display: block;
+  overflow: hidden;
+}
+
+.flip-row .flip-bg {
+  position: absolute;
+  inset: 0;
+  transform-origin: bottom;
+  transform: scaleY(0);
+  background: var(--light-surface);
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.flip-row:hover .flip-bg,
+.flip-row:focus-visible .flip-bg {
+  transform: scaleY(1);
+}
+
+.flip-row .flip-content {
+  position: relative;
+  transition: color 0.5s ease;
+}
+
+.flip-row:hover .flip-content,
+.flip-row:focus-visible .flip-content {
+  color: var(--light-ink);
 }
 
 :focus-visible {

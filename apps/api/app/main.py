@@ -62,6 +62,10 @@ _MEDIA_TYPES = {
     "PNG": "image/png",
     "WEBP": "image/webp",
     "AVIF": "image/avif",
+    "GIF": "image/gif",
+    "BMP": "image/bmp",
+    "TIFF": "image/tiff",
+    "PDF": "application/pdf",
 }
 
 

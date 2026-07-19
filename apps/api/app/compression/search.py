@@ -171,3 +171,57 @@ def search_quality_scale(encode: Encoder, target_bytes: Optional[int]) -> Search
         target_met=len(data) <= target_bytes,
         target_bytes=target_bytes,
     )
+
+
+DownscaleEncoder = Callable[[float], bytes]
+
+
+def search_downscale_only(encode: DownscaleEncoder, target_bytes: Optional[int]) -> SearchResult:
+    """For lossless formats with no quality knob (BMP, TIFF) - measured
+    directly (see the format module's own comments): there's no compression
+    setting that trades size for quality, so downscaling resolution is the
+    only lever that reduces output size at all.
+    """
+    start = time.monotonic()
+    attempts = 0
+
+    def try_encode(scale: float) -> bytes:
+        nonlocal attempts
+        attempts += 1
+        return encode(scale)
+
+    if target_bytes is None:
+        data = try_encode(1.0)
+        return SearchResult(
+            data=data,
+            scale=1.0,
+            quality=100,
+            size_bytes=len(data),
+            attempts=attempts,
+            elapsed_ms=(time.monotonic() - start) * 1000,
+            target_met=True,
+            target_bytes=None,
+        )
+
+    best_data = try_encode(1.0)
+    best_scale = 1.0
+    if len(best_data) > target_bytes:
+        for scale in SCALE_STEPS[1:]:
+            if attempts >= MAX_ATTEMPTS or (time.monotonic() - start) >= TIME_BUDGET_SECONDS:
+                break
+            data = try_encode(scale)
+            best_data, best_scale = data, scale
+            if len(data) <= target_bytes:
+                break
+
+    elapsed_ms = (time.monotonic() - start) * 1000
+    return SearchResult(
+        data=best_data,
+        scale=best_scale,
+        quality=100,
+        size_bytes=len(best_data),
+        attempts=attempts,
+        elapsed_ms=elapsed_ms,
+        target_met=len(best_data) <= target_bytes,
+        target_bytes=target_bytes,
+    )

@@ -39,3 +39,15 @@ def image_to_bytes(image: Image.Image, fmt: str = "PNG") -> bytes:
     buf = BytesIO()
     image.save(buf, format=fmt)
     return buf.getvalue()
+
+
+@pytest.fixture
+def heic_bytes(photo_image) -> bytes:
+    """A real HEIC-encoded file (not just a renamed JPEG) to prove decode
+    support actually works, not just that the extension is accepted."""
+    import pillow_heif
+
+    heif_file = pillow_heif.from_pillow(photo_image)
+    buf = BytesIO()
+    heif_file.save(buf, format="HEIF")
+    return buf.getvalue()

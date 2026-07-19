@@ -31,7 +31,7 @@ def test_optimize_rejects_unsupported_format(photo_image):
         response = client.post(
             "/api/optimize",
             files={"file": ("photo.png", image_to_bytes(photo_image), "image/png")},
-            data={"format": "gif"},
+            data={"format": "svg"},  # not supported: vector format, needs vectorization
         )
         assert response.status_code == 400
 

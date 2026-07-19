@@ -5,20 +5,29 @@ from typing import Optional
 
 from PIL import Image
 
+from .. import heif_support  # noqa: F401  registers HEIC decode with Pillow in worker processes
 from .avif import optimize_avif
+from .bmp import optimize_bmp
 from .content_signal import recommend_format
+from .gif import optimize_gif
 from .jpeg import optimize_jpeg
+from .pdf import optimize_pdf
 from .png import optimize_png
 from .search import SearchResult
+from .tiff import optimize_tiff
 from .webp import optimize_webp
 
-SUPPORTED_FORMATS = {"JPEG", "PNG", "WEBP", "AVIF"}
+SUPPORTED_FORMATS = {"JPEG", "PNG", "WEBP", "AVIF", "GIF", "BMP", "TIFF", "PDF"}
 
 _OPTIMIZERS = {
     "JPEG": optimize_jpeg,
     "PNG": optimize_png,
     "WEBP": optimize_webp,
     "AVIF": optimize_avif,
+    "GIF": optimize_gif,
+    "BMP": optimize_bmp,
+    "TIFF": optimize_tiff,
+    "PDF": optimize_pdf,
 }
 
 

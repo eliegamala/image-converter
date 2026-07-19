@@ -4,6 +4,7 @@ from io import BytesIO
 
 from PIL import Image
 
+from . import heif_support  # noqa: F401  registers HEIC decode with Pillow
 from .config import MAX_IMAGE_PIXELS, MAX_UPLOAD_BYTES
 
 

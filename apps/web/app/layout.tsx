@@ -1,15 +1,24 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
-import Script from "next/script";
+import { Big_Shoulders, Fraunces, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 // next/font/google downloads and self-hosts these at build time - the
 // browser never makes a runtime request to Google Fonts, which removes the
 // extra external round trip the original prototype had (see DEVELOPMENT.md
 // 2: "Fonts (Google Fonts CDN)").
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
+const bigShoulders = Big_Shoulders({
+  variable: "--font-shoulders",
   subsets: ["latin"],
+  weight: "variable",
+  axes: ["opsz"],
+  display: "swap",
+});
+
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  style: ["italic"],
+  weight: ["400", "500"],
   display: "swap",
 });
 
@@ -30,11 +39,11 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "ImageConvert — precision image optimization",
+    default: "Image Converter – Convert, Compress & Optimize Images Online",
     template: "%s — ImageConvert",
   },
   description:
-    "Convert and compress images to JPEG, PNG, WebP, or AVIF with a target file size. Nothing you upload is stored.",
+    "Convert JPG, PNG, WebP, AVIF and HEIC images online. Compress and optimize images without losing quality. Fast, free, secure and no registration required.",
   openGraph: {
     type: "website",
     siteName: "ImageConvert",
@@ -56,7 +65,7 @@ const softwareApplicationJsonLd = {
     priceCurrency: "USD",
   },
   description:
-    "Free browser-based tool to convert and compress images to JPEG, PNG, WebP, or AVIF to a target file size.",
+    "Free browser-based tool to convert and compress images between JPG, PNG, WebP, AVIF and HEIC, to a target file size or the best quality possible.",
 };
 
 export default function RootLayout({
@@ -67,8 +76,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${spaceGrotesk.variable} ${inter.variable} ${jetbrainsMono.variable}`}
-      suppressHydrationWarning
+      className={`${bigShoulders.variable} ${fraunces.variable} ${inter.variable} ${jetbrainsMono.variable}`}
     >
       <head>
         <script
@@ -76,21 +84,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationJsonLd) }}
         />
       </head>
-      <body className="min-h-screen antialiased">
-        <Script id="theme-init" strategy="beforeInteractive">
-          {`
-            (function () {
-              try {
-                var stored = localStorage.getItem("theme");
-                if (stored === "light" || stored === "dark") {
-                  document.documentElement.setAttribute("data-theme", stored);
-                }
-              } catch (e) {}
-            })();
-          `}
-        </Script>
-        {children}
-      </body>
+      <body className="min-h-screen antialiased">{children}</body>
     </html>
   );
 }

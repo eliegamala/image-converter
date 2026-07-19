@@ -1,4 +1,4 @@
-export type ImageFormat = "jpeg" | "png" | "webp" | "avif";
+export type ImageFormat = "jpeg" | "png" | "webp" | "avif" | "gif" | "bmp" | "tiff" | "pdf";
 
 export interface OptimizeResult {
   blob: Blob;

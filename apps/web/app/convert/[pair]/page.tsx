@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { Breadcrumb } from "@/components/Breadcrumb";
+import { Footer } from "@/components/Footer";
+import { Header } from "@/components/Header";
 import { Tool } from "@/components/Tool";
 import { CONVERSIONS, getConversionBySlug } from "@/content/conversions";
 
@@ -52,9 +54,10 @@ export default async function ConversionPage({ params }: PageProps) {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "ImageConvert", item: "/" },
+      { "@type": "ListItem", position: 2, name: "Tools", item: "/convert" },
       {
         "@type": "ListItem",
-        position: 2,
+        position: 3,
         name: conversion.title,
         item: `/convert/${conversion.slug}`,
       },
@@ -66,7 +69,7 @@ export default async function ConversionPage({ params }: PageProps) {
   ).slice(0, 4);
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-5xl flex-col px-6 py-8">
+    <div className="flex min-h-screen flex-col">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
@@ -76,22 +79,35 @@ export default async function ConversionPage({ params }: PageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
-      <header className="mb-10 flex items-center justify-between">
-        <Link href="/" className="font-display text-lg">
-          ImageConvert
-        </Link>
-        <ThemeToggle />
-      </header>
+      <div className="hero-dark">
+        <Header />
+        <div className="mx-auto max-w-3xl px-6 pt-2 pb-16 text-center">
+          <div className="mb-6 flex justify-center">
+            <Breadcrumb
+              items={[
+                { label: "ImageConvert", href: "/" },
+                { label: "Tools", href: "/convert" },
+                { label: conversion.title },
+              ]}
+            />
+          </div>
+          <h1 className="font-display text-ink text-4xl font-semibold sm:text-5xl">
+            {conversion.title}
+          </h1>
+          <p className="text-ink/70 mt-4">{conversion.intro}</p>
 
-      <main className="flex flex-1 flex-col items-center gap-4">
-        <div className="mx-auto max-w-2xl text-center">
-          <h1 className="font-display text-3xl sm:text-4xl">{conversion.title}</h1>
-          <p className="text-ink-muted mt-3">{conversion.intro}</p>
+          <div className="on-light border-border bg-surface mt-10 rounded-2xl border p-6 text-left shadow-xl sm:p-8">
+            <Tool
+              defaultFormat={conversion.to}
+              defaultSourceFormat={conversion.from}
+              lockFormat
+            />
+          </div>
         </div>
+      </div>
 
-        <Tool defaultFormat={conversion.to} lockFormat />
-
-        <section className="mx-auto mt-12 w-full max-w-2xl">
+      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center gap-4 px-6 py-16">
+        <section className="mx-auto w-full max-w-2xl">
           <h2 className="font-display mb-4 text-xl">Frequently asked questions</h2>
           <dl className="flex flex-col gap-4">
             {conversion.faqs.map((faq) => (
@@ -109,10 +125,7 @@ export default async function ConversionPage({ params }: PageProps) {
             <ul className="flex flex-wrap gap-2">
               {related.map((c) => (
                 <li key={c.slug}>
-                  <Link
-                    href={`/convert/${c.slug}`}
-                    className="rounded-full border border-border px-4 py-1.5 text-sm text-ink-muted hover:text-ink"
-                  >
+                  <Link href={`/convert/${c.slug}`} className="conversion-pill dashed-pill px-4 py-1.5 text-sm">
                     {c.title}
                   </Link>
                 </li>
@@ -121,6 +134,7 @@ export default async function ConversionPage({ params }: PageProps) {
           </section>
         )}
       </main>
+      <Footer />
     </div>
   );
 }

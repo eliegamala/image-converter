@@ -70,3 +70,56 @@ def test_png_quantizes_to_hit_target(transparent_png_image):
     # larger than the untouched lossless encode.
     assert result.size_bytes <= lossless.size_bytes
     assert result.quality <= 256
+
+
+def test_gif_quantizes_to_hit_target(photo_image):
+    # GIF's indexed-color palette (max 256, and this test drives it all the
+    # way down to 16) genuinely struggles with noisy/photographic content -
+    # measured directly: even the smallest palette only gets this synthetic
+    # photo down to ~587KB, not the 100KB a JPEG/WebP/AVIF target would hit.
+    # 700KB is a realistic target for this image, not an arbitrary pass.
+    lossless = optimize_image(photo_image, "GIF", target_bytes=None)
+    result = optimize_image(photo_image, "GIF", target_bytes=700_000)
+    assert result.target_met
+    assert result.size_bytes <= 700_000
+    assert result.size_bytes <= lossless.size_bytes
+    assert result.quality < 256  # quantization actually kicked in
+
+
+def test_gif_flattens_alpha_to_white(transparent_png_image):
+    result = optimize_image(transparent_png_image, "GIF", target_bytes=None)
+    decoded = Image.open(BytesIO(result.data)).convert("RGB")
+    assert decoded.getpixel((10, 10)) == (255, 255, 255)
+
+
+def test_pdf_hits_target_via_quality_search(photo_image):
+    result = optimize_image(photo_image, "PDF", target_bytes=150_000)
+    assert result.target_met
+    assert result.size_bytes <= 150_000
+    assert result.quality >= QUALITY_FLOOR
+
+
+def test_bmp_downscales_to_hit_target(photo_image):
+    # BMP is measured to be effectively uncompressed - there's no quality
+    # knob, so hitting a small target must come from downscaling. At the
+    # smallest scale step (0.3x) a 1600x1200 source bottoms out around
+    # ~518KB, so the target here must be achievable at that floor.
+    full_res = optimize_image(photo_image, "BMP", target_bytes=None)
+    result = optimize_image(photo_image, "BMP", target_bytes=600_000)
+    assert result.target_met
+    assert result.size_bytes <= 600_000
+    assert result.scale < 1.0
+    assert result.size_bytes < full_res.size_bytes
+
+
+def test_tiff_hits_target_via_downscale(photo_image):
+    result = optimize_image(photo_image, "TIFF", target_bytes=500_000)
+    assert result.target_met
+    assert result.size_bytes <= 500_000
+
+
+def test_bmp_and_tiff_flatten_alpha_to_white(transparent_png_image):
+    for fmt in ("BMP", "TIFF"):
+        result = optimize_image(transparent_png_image, fmt, target_bytes=None)
+        decoded = Image.open(BytesIO(result.data)).convert("RGB")
+        assert decoded.getpixel((10, 10)) == (255, 255, 255)

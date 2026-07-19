@@ -1,8 +1,13 @@
 import type { ImageFormat } from "@/lib/api";
 
+/** HEIC is accepted as a conversion *source* only - nobody wants to save an
+ * optimized web image back into HEIC, so it's not one of the tool's output
+ * formats (see lib/api.ts's ImageFormat), only a landing-page source. */
+export type SourceFormat = ImageFormat | "heic";
+
 export interface ConversionPair {
   slug: string;
-  from: ImageFormat;
+  from: SourceFormat;
   to: ImageFormat;
   fromLabel: string;
   toLabel: string;
@@ -11,15 +16,27 @@ export interface ConversionPair {
   faqs: { question: string; answer: string }[];
 }
 
-const LABELS: Record<ImageFormat, string> = {
-  jpeg: "JPEG",
-  png: "PNG",
-  webp: "WebP",
-  avif: "AVIF",
+interface FormatMeta {
+  label: string;
+  /** URL-slug segment - "jpg" rather than "jpeg" to match how people
+   * actually search ("jpg to webp"), not the backend's format param. */
+  slug: string;
+}
+
+const FORMAT_META: Record<SourceFormat, FormatMeta> = {
+  jpeg: { label: "JPG", slug: "jpg" },
+  png: { label: "PNG", slug: "png" },
+  webp: { label: "WebP", slug: "webp" },
+  avif: { label: "AVIF", slug: "avif" },
+  heic: { label: "HEIC", slug: "heic" },
+  gif: { label: "GIF", slug: "gif" },
+  bmp: { label: "BMP", slug: "bmp" },
+  tiff: { label: "TIFF", slug: "tiff" },
+  pdf: { label: "PDF", slug: "pdf" },
 };
 
 interface RawPair {
-  from: ImageFormat;
+  from: SourceFormat;
   to: ImageFormat;
   intro: string;
   faqs: { question: string; answer: string }[];
@@ -48,17 +65,17 @@ const RAW_PAIRS: RawPair[] = [
     from: "png",
     to: "jpeg",
     intro:
-      "If your PNG is really a photo with no transparency, it's carrying lossless-compression overhead it doesn't need. Converting to JPEG drops the alpha channel and applies photo-appropriate compression, which is usually much smaller for photographic content.",
+      "If your PNG is really a photo with no transparency, it's carrying lossless-compression overhead it doesn't need. Converting to JPG drops the alpha channel and applies photo-appropriate compression, which is usually much smaller for photographic content.",
     faqs: [
       {
         question: "What happens to transparent areas?",
         answer:
-          "JPEG has no transparency support, so any transparent or semi-transparent pixels are flattened onto a white background before encoding.",
+          "JPG has no transparency support, so any transparent or semi-transparent pixels are flattened onto a white background before encoding.",
       },
       {
         question: "Will this lose quality?",
         answer:
-          "JPEG is a lossy format, so there's some quality trade-off - but you control it directly, either by picking a target file size or letting the tool default to the highest quality that still meets it.",
+          "JPG is a lossy format, so there's some quality trade-off - but you control it directly, either by picking a target file size or letting the tool default to the highest quality that still meets it.",
       },
     ],
   },
@@ -75,7 +92,7 @@ const RAW_PAIRS: RawPair[] = [
       {
         question: "Is AVIF supported everywhere?",
         answer:
-          "All modern browsers support AVIF. For older software or strict compatibility needs, convert to JPEG or WebP instead.",
+          "All modern browsers support AVIF. For older software or strict compatibility needs, convert to JPG or WebP instead.",
       },
     ],
   },
@@ -83,12 +100,12 @@ const RAW_PAIRS: RawPair[] = [
     from: "jpeg",
     to: "webp",
     intro:
-      "WebP is the modern default for photos on the web: at the same visual quality, it's routinely 25-35% smaller than JPEG. If you're shipping photos to a website and care about load time, this is the conversion to make.",
+      "WebP is the modern default for photos on the web: at the same visual quality, it's routinely 25-35% smaller than JPG. If you're shipping photos to a website and care about load time, this is the conversion to make.",
     faqs: [
       {
-        question: "Will WebP look worse than my original JPEG?",
+        question: "Will WebP look worse than my original JPG?",
         answer:
-          "Not at equivalent settings - WebP typically matches JPEG's visual quality at a smaller file size, rather than trading quality for size.",
+          "Not at equivalent settings - WebP typically matches JPG's visual quality at a smaller file size, rather than trading quality for size.",
       },
       {
         question: "Can I target an exact file size?",
@@ -101,17 +118,17 @@ const RAW_PAIRS: RawPair[] = [
     from: "jpeg",
     to: "png",
     intro:
-      "Converting JPEG to PNG gives you a lossless copy - useful when you need to hand an image into an editing pipeline or tool that expects PNG and you want to stop further generational JPEG quality loss from repeated re-saves.",
+      "Converting JPG to PNG gives you a lossless copy - useful when you need to hand an image into an editing pipeline or tool that expects PNG and you want to stop further generational JPG quality loss from repeated re-saves.",
     faqs: [
       {
-        question: "Will converting to PNG recover detail lost by JPEG compression?",
+        question: "Will converting to PNG recover detail lost by JPG compression?",
         answer:
-          "No - PNG is lossless from this point forward, but it can't restore detail JPEG compression already discarded. It just stops further loss.",
+          "No - PNG is lossless from this point forward, but it can't restore detail JPG compression already discarded. It just stops further loss.",
       },
       {
-        question: "Why would a PNG of a photo be so much bigger than the JPEG?",
+        question: "Why would a PNG of a photo be so much bigger than the JPG?",
         answer:
-          "PNG compresses losslessly, which is much less efficient for photographic detail and noise than JPEG's lossy compression - expect a noticeably larger file.",
+          "PNG compresses losslessly, which is much less efficient for photographic detail and noise than JPG's lossy compression - expect a noticeably larger file.",
       },
     ],
   },
@@ -119,17 +136,17 @@ const RAW_PAIRS: RawPair[] = [
     from: "jpeg",
     to: "avif",
     intro:
-      "For the smallest possible photo delivery on the web, AVIF is currently the best option, often beating JPEG by 50% or more at comparable quality. This is the conversion to reach for when every kilobyte of page weight matters.",
+      "For the smallest possible photo delivery on the web, AVIF is currently the best option, often beating JPG by 50% or more at comparable quality. This is the conversion to reach for when every kilobyte of page weight matters.",
     faqs: [
       {
-        question: "How much smaller is AVIF than JPEG, really?",
+        question: "How much smaller is AVIF than JPG, really?",
         answer:
           "It varies by image, but 40-60% smaller at similar visual quality is a common result for photographic content.",
       },
       {
         question: "Is AVIF encoding slow?",
         answer:
-          "It can be slower than JPEG or WebP to encode, which is why this tool uses a fast search pass and only does one slow, exhaustive final encode for the winning result.",
+          "It can be slower than JPG or WebP to encode, which is why this tool uses a fast search pass and only does one slow, exhaustive final encode for the winning result.",
       },
     ],
   },
@@ -137,16 +154,16 @@ const RAW_PAIRS: RawPair[] = [
     from: "webp",
     to: "jpeg",
     intro:
-      "Not every tool, printer, or older piece of software accepts WebP. Converting to JPEG trades a little efficiency for near-universal compatibility - the right move when you need the file to just work everywhere.",
+      "Not every tool, printer, or older piece of software accepts WebP. Converting to JPG trades a little efficiency for near-universal compatibility - the right move when you need the file to just work everywhere.",
     faqs: [
       {
         question: "Why would I convert away from the smaller WebP format?",
         answer:
-          "Compatibility. Some legacy software, print workflows, and email clients still don't handle WebP reliably - JPEG is the safe fallback.",
+          "Compatibility. Some legacy software, print workflows, and email clients still don't handle WebP reliably - JPG is the safe fallback.",
       },
       {
-        question: "Does WebP's transparency survive as JPEG?",
-        answer: "No - JPEG has no alpha channel, so any transparency is flattened onto white first.",
+        question: "Does WebP's transparency survive as JPG?",
+        answer: "No - JPG has no alpha channel, so any transparency is flattened onto white first.",
       },
     ],
   },
@@ -182,7 +199,7 @@ const RAW_PAIRS: RawPair[] = [
       {
         question: "Do I need to drop WebP support if I switch to AVIF?",
         answer:
-          "No - most sites serve AVIF to browsers that support it and fall back to WebP or JPEG for the rest.",
+          "No - most sites serve AVIF to browsers that support it and fall back to WebP or JPG for the rest.",
       },
     ],
   },
@@ -190,15 +207,15 @@ const RAW_PAIRS: RawPair[] = [
     from: "avif",
     to: "jpeg",
     intro:
-      "AVIF isn't accepted by every image editor, CMS, or older browser yet. Converting to JPEG gives you a version that opens anywhere, at the cost of some of AVIF's size advantage.",
+      "AVIF isn't accepted by every image editor, CMS, or older browser yet. Converting to JPG gives you a version that opens anywhere, at the cost of some of AVIF's size advantage.",
     faqs: [
       {
         question: "Why would I have an AVIF file that needs converting?",
         answer:
-          "It's increasingly common for photos and downloads to arrive as AVIF by default - converting to JPEG is the fix when a tool or workflow doesn't accept it.",
+          "It's increasingly common for photos and downloads to arrive as AVIF by default - converting to JPG is the fix when a tool or workflow doesn't accept it.",
       },
       {
-        question: "Will the JPEG be bigger than the AVIF?",
+        question: "Will the JPG be bigger than the AVIF?",
         answer:
           "Typically yes, since AVIF is the more space-efficient of the two formats at equivalent quality.",
       },
@@ -235,22 +252,57 @@ const RAW_PAIRS: RawPair[] = [
       {
         question: "Will I lose much by moving from AVIF to WebP?",
         answer:
-          "Some size efficiency, typically, but the difference is usually modest compared to going all the way back to JPEG or PNG.",
+          "Some size efficiency, typically, but the difference is usually modest compared to going all the way back to JPG or PNG.",
+      },
+    ],
+  },
+  {
+    from: "heic",
+    to: "jpeg",
+    intro:
+      "HEIC is the default photo format on iPhone, but most websites, Windows apps, and older software can't open it. Converting to JPG gives you a copy that opens everywhere - on any device, in any photo app, in any upload form.",
+    faqs: [
+      {
+        question: "Why do my iPhone photos save as HEIC instead of JPG?",
+        answer:
+          "Apple uses HEIC by default since it stores photos at a smaller file size than JPG at similar quality. The tradeoff is that a lot of non-Apple software doesn't support it.",
+      },
+      {
+        question: "Will converting to JPG make my photo blurrier or lower quality?",
+        answer:
+          "Only as much as any JPG encode does. You control the tradeoff directly - target a specific file size, or let the tool default to the highest quality that still meets it.",
+      },
+    ],
+  },
+  {
+    from: "heic",
+    to: "png",
+    intro:
+      "Need a lossless, universally-compatible copy of an iPhone photo - for editing, archiving, or a tool that doesn't read HEIC at all? Converting to PNG preserves every pixel and any transparency exactly.",
+    faqs: [
+      {
+        question: "Does this work with Live Photos or just the still image?",
+        answer: "It converts the still HEIC image itself, not any motion data bundled alongside a Live Photo.",
+      },
+      {
+        question: "Why is the PNG so much bigger than the original HEIC?",
+        answer:
+          "PNG is lossless, which is far less space-efficient than HEIC's compression for photographic detail - a significant size increase is expected.",
       },
     ],
   },
 ];
 
 export const CONVERSIONS: ConversionPair[] = RAW_PAIRS.map((pair) => {
-  const fromLabel = LABELS[pair.from];
-  const toLabel = LABELS[pair.to];
+  const fromMeta = FORMAT_META[pair.from];
+  const toMeta = FORMAT_META[pair.to];
   return {
-    slug: `${pair.from}-to-${pair.to}`,
+    slug: `${fromMeta.slug}-to-${toMeta.slug}`,
     from: pair.from,
     to: pair.to,
-    fromLabel,
-    toLabel,
-    title: `Convert ${fromLabel} to ${toLabel}`,
+    fromLabel: fromMeta.label,
+    toLabel: toMeta.label,
+    title: `Convert ${fromMeta.label} to ${toMeta.label}`,
     intro: pair.intro,
     faqs: pair.faqs,
   };

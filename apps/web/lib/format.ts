@@ -15,3 +15,9 @@ export function formatPercentSaved(originalBytes: number, outputBytes: number): 
   const saved = ((originalBytes - outputBytes) / originalBytes) * 100;
   return `${saved.toFixed(saved >= 10 ? 0 : 1)}%`;
 }
+
+export function formatCompressionRatio(originalBytes: number, outputBytes: number): string {
+  if (outputBytes <= 0) return "-";
+  const ratio = originalBytes / outputBytes;
+  return `${ratio.toFixed(ratio >= 10 ? 0 : 1)}:1`;
+}

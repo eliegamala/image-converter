@@ -10,35 +10,94 @@ import {
   type ImageFormat,
   type OptimizeResult,
 } from "@/lib/api";
-import { formatBytes, formatPercentSaved } from "@/lib/format";
+import { formatBytes, formatCompressionRatio, formatPercentSaved } from "@/lib/format";
 
-const FORMATS: { value: ImageFormat; label: string }[] = [
+const OUTPUT_FORMATS: { value: ImageFormat; label: string }[] = [
   { value: "webp", label: "WebP" },
   { value: "avif", label: "AVIF" },
-  { value: "jpeg", label: "JPEG" },
+  { value: "jpeg", label: "JPG" },
   { value: "png", label: "PNG" },
+  { value: "gif", label: "GIF" },
+  { value: "bmp", label: "BMP" },
+  { value: "tiff", label: "TIFF" },
+  { value: "pdf", label: "PDF" },
 ];
+
+// "From" is informational only (the backend auto-detects the real source
+// format from file bytes) - it sets user expectations and narrows the file
+// picker's accept hint, but nothing here gates what can actually be uploaded.
+const SOURCE_FORMATS: { value: string; label: string }[] = [
+  { value: "auto", label: "Auto-detect" },
+  { value: "jpeg", label: "JPG" },
+  { value: "png", label: "PNG" },
+  { value: "webp", label: "WebP" },
+  { value: "avif", label: "AVIF" },
+  { value: "heic", label: "HEIC" },
+  { value: "gif", label: "GIF" },
+  { value: "bmp", label: "BMP" },
+  { value: "tiff", label: "TIFF" },
+];
+
+const EXTENSIONS: Record<ImageFormat, string> = {
+  jpeg: "jpg",
+  png: "png",
+  webp: "webp",
+  avif: "avif",
+  gif: "gif",
+  bmp: "bmp",
+  tiff: "tiff",
+  pdf: "pdf",
+};
+
+// Most browsers can't render these as <img> at all (no TIFF/PDF decode in
+// the <img> pipeline, unlike HEIC where only some browsers can't) - skip
+// trying to preview the result for these rather than show a broken image.
+const NO_PREVIEW_FORMATS = new Set<ImageFormat>(["tiff", "pdf"]);
+
+const SIZE_PRESETS_KB = [20, 50, 100, 200];
 
 type Status = "idle" | "loading" | "done" | "error";
 
 interface ToolProps {
   defaultFormat?: ImageFormat;
+  defaultSourceFormat?: string;
   /** Landing pages promise a specific conversion - don't let the
    * auto-recommendation override that choice, just show it as a hint. */
   lockFormat?: boolean;
+  /** Lets a hero section hide its decorative artwork once a real file is
+   * selected, instead of showing both at once. */
+  onFileChange?: (hasFile: boolean) => void;
 }
 
-export function Tool({ defaultFormat = "webp", lockFormat = false }: ToolProps) {
+function triggerDownload(url: string, filename: string) {
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+export function Tool({
+  defaultFormat = "webp",
+  defaultSourceFormat = "auto",
+  lockFormat = false,
+  onFileChange,
+}: ToolProps) {
+  const [sourceFormat, setSourceFormat] = useState(defaultSourceFormat);
+  const [format, setFormat] = useState<ImageFormat>(defaultFormat);
+  const [recommendedFormat, setRecommendedFormat] = useState<ImageFormat | null>(null);
+  const [targetKB, setTargetKB] = useState<number | null>(null);
+
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [naturalSize, setNaturalSize] = useState<{ width: number; height: number } | null>(null);
-  const [format, setFormat] = useState<ImageFormat>(defaultFormat);
-  const [recommendedFormat, setRecommendedFormat] = useState<ImageFormat | null>(null);
-  const [targetMode, setTargetMode] = useState<"auto" | "size">("auto");
-  const [targetKB, setTargetKB] = useState(200);
+  const [previewUnsupported, setPreviewUnsupported] = useState(false);
+
   const [result, setResult] = useState<OptimizeResult | null>(null);
   const [status, setStatus] = useState<Status>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const previewUrlRef = useRef<string | null>(null);
   const resultUrlRef = useRef<string | null>(null);
   const userTouchedFormatRef = useRef(false);
@@ -58,9 +117,16 @@ export function Tool({ defaultFormat = "webp", lockFormat = false }: ToolProps) 
       setStatus("idle");
       setErrorMessage(null);
       setRecommendedFormat(null);
+      setNaturalSize(null);
+      setPreviewUnsupported(false);
+      onFileChange?.(true);
 
       const img = new Image();
       img.onload = () => setNaturalSize({ width: img.naturalWidth, height: img.naturalHeight });
+      // HEIC/TIFF and a few others can't be decoded in an <img> by most
+      // browsers - fall back to showing the result alone once it's ready,
+      // instead of silently showing nothing.
+      img.onerror = () => setPreviewUnsupported(true);
       img.src = url;
 
       recommendFormat(newFile).then((rec) => {
@@ -69,7 +135,7 @@ export function Tool({ defaultFormat = "webp", lockFormat = false }: ToolProps) 
         if (!lockFormat && !userTouchedFormatRef.current) setFormat(rec);
       });
     },
-    [lockFormat]
+    [lockFormat, onFileChange]
   );
 
   useEffect(() => {
@@ -107,6 +173,7 @@ export function Tool({ defaultFormat = "webp", lockFormat = false }: ToolProps) 
     setResult(null);
     setStatus("idle");
     setErrorMessage(null);
+    onFileChange?.(false);
   }
 
   async function handleOptimize() {
@@ -114,12 +181,13 @@ export function Tool({ defaultFormat = "webp", lockFormat = false }: ToolProps) 
     setStatus("loading");
     setErrorMessage(null);
     try {
-      const targetBytes = targetMode === "size" ? targetKB * 1024 : undefined;
+      const targetBytes = targetKB ? targetKB * 1024 : undefined;
       const optimized = await optimizeImage(file, format, targetBytes);
       if (resultUrlRef.current) URL.revokeObjectURL(resultUrlRef.current);
       resultUrlRef.current = optimized.url;
       setResult(optimized);
       setStatus("done");
+      triggerDownload(optimized.url, `optimized.${EXTENSIONS[format]}`);
     } catch (err) {
       const message = err instanceof OptimizeError ? err.message : "Something went wrong. Try again.";
       setErrorMessage(message);
@@ -127,77 +195,138 @@ export function Tool({ defaultFormat = "webp", lockFormat = false }: ToolProps) 
     }
   }
 
-  if (!file || !previewUrl) {
-    return (
-      <div className="mx-auto w-full max-w-2xl">
-        <Dropzone onFile={handleFile} />
-      </div>
-    );
-  }
+  const resultHasNoPreview = NO_PREVIEW_FORMATS.has(format);
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
-      {naturalSize && (
-        <CompareSlider
-          beforeSrc={previewUrl}
-          afterSrc={result?.url ?? previewUrl}
-          naturalWidth={naturalSize.width}
-          naturalHeight={naturalSize.height}
-        />
-      )}
-
-      <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Output format">
-        {FORMATS.map((f) => (
-          <button
-            key={f.value}
-            type="button"
-            onClick={() => selectFormat(f.value)}
-            aria-pressed={format === f.value}
-            className={`font-readout rounded-full border px-4 py-1.5 text-xs transition-colors ${
-              format === f.value
-                ? "border-focus bg-focus text-white"
-                : "border-border text-ink-muted hover:text-ink"
-            }`}
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 text-left">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <label className="block">
+          <span className="text-ink-muted text-xs font-medium">Convert From</span>
+          <select
+            value={sourceFormat}
+            onChange={(event) => setSourceFormat(event.target.value)}
+            className="border-border bg-surface mt-1 w-full rounded-lg border px-3 py-2 text-sm"
           >
-            {f.label}
-            {recommendedFormat === f.value && (
-              <span className="ml-1.5 opacity-70">· recommended</span>
-            )}
-          </button>
-        ))}
+            {SOURCE_FORMATS.map((f) => (
+              <option key={f.value} value={f.value}>
+                {f.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="block">
+          <span className="text-ink-muted text-xs font-medium">Convert To</span>
+          <select
+            value={format}
+            onChange={(event) => selectFormat(event.target.value as ImageFormat)}
+            className="border-border bg-surface mt-1 w-full rounded-lg border px-3 py-2 text-sm"
+          >
+            {OUTPUT_FORMATS.map((f) => (
+              <option key={f.value} value={f.value}>
+                {f.label}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
 
-      <div className="flex flex-wrap items-center gap-4">
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="radio"
-            name="target-mode"
-            checked={targetMode === "auto"}
-            onChange={() => setTargetMode("auto")}
-          />
-          Best quality (no size target)
-        </label>
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="radio"
-            name="target-mode"
-            checked={targetMode === "size"}
-            onChange={() => setTargetMode("size")}
-          />
-          Target size
-        </label>
-        {targetMode === "size" && (
+      <div>
+        <h3 className="font-display text-sm font-bold">Choose Output Format</h3>
+        <div className="mt-2 flex flex-wrap items-center gap-2" role="group" aria-label="Output format">
+          {OUTPUT_FORMATS.map((f) => (
+            <button
+              key={f.value}
+              type="button"
+              onClick={() => selectFormat(f.value)}
+              aria-pressed={format === f.value}
+              className={`font-readout rounded-full border px-4 py-1.5 text-xs transition-colors ${
+                format === f.value
+                  ? "border-focus bg-focus text-white"
+                  : "border-border text-ink-muted hover:text-ink hover:border-primary"
+              }`}
+            >
+              {f.label}
+              {recommendedFormat === f.value && (
+                <span className="ml-1.5 opacity-70">· recommended</span>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <h3 className="font-display text-sm font-bold">Reduce Image Size In KB</h3>
+        <p className="text-ink-muted mt-1 text-sm">
+          Compress an image to 20KB, 50KB, 100KB, 200KB, or any other size.
+        </p>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setTargetKB(null)}
+            aria-pressed={targetKB === null}
+            className={`rounded-full border px-4 py-1.5 text-xs font-medium transition-colors ${
+              targetKB === null
+                ? "border-focus bg-focus text-white"
+                : "border-border text-ink-muted hover:text-ink hover:border-primary"
+            }`}
+          >
+            Best Quality
+          </button>
+          {SIZE_PRESETS_KB.map((kb) => (
+            <button
+              key={kb}
+              type="button"
+              onClick={() => setTargetKB(kb)}
+              aria-pressed={targetKB === kb}
+              className={`font-readout rounded-full border px-4 py-1.5 text-xs transition-colors ${
+                targetKB === kb
+                  ? "border-focus bg-focus text-white"
+                  : "border-border text-ink-muted hover:text-ink hover:border-primary"
+              }`}
+            >
+              {kb} KB
+            </button>
+          ))}
           <label className="flex items-center gap-2 text-sm">
             <input
               type="number"
               min={1}
-              value={targetKB}
-              onChange={(event) => setTargetKB(Number(event.target.value) || 1)}
-              className="font-readout w-20 rounded border border-border bg-surface px-2 py-1"
-              aria-label="Target size in kilobytes"
+              value={targetKB ?? ""}
+              onChange={(event) =>
+                setTargetKB(event.target.value ? Number(event.target.value) : null)
+              }
+              placeholder="Custom"
+              className="font-readout border-border bg-surface w-24 rounded border px-2 py-1"
+              aria-label="Custom target size in kilobytes"
             />
             KB
           </label>
+        </div>
+        <ul className="text-ink-muted mt-3 flex flex-col gap-1 text-xs leading-relaxed">
+          <li>
+            <span className="text-ink font-medium">Efficient Size Reduction:</span> resize images
+            to 100KB with preserved clarity, eliminating oversized files.
+          </li>
+          <li>
+            <span className="text-ink font-medium">Effortless Photo Resizing:</span> our
+            user-friendly interface lets you resize images in KB with just a few clicks - no
+            technical expertise required.
+          </li>
+        </ul>
+      </div>
+
+      <div>
+        <Dropzone onFile={handleFile} />
+        {file && (
+          <p className="text-ink-muted mt-2 text-xs">
+            Selected: {file.name} ({formatBytes(file.size)})
+          </p>
+        )}
+        {previewUnsupported && !result && (
+          <p className="text-ink-muted mt-2 text-xs">
+            Your browser can&apos;t preview this file format directly, but it will still convert
+            correctly - click Convert below.
+          </p>
         )}
       </div>
 
@@ -205,19 +334,21 @@ export function Tool({ defaultFormat = "webp", lockFormat = false }: ToolProps) 
         <button
           type="button"
           onClick={handleOptimize}
-          disabled={status === "loading"}
-          className="rounded-lg bg-focus px-5 py-2.5 font-medium text-white transition-opacity disabled:opacity-50"
+          disabled={!file || status === "loading"}
+          className="bg-primary text-primary-ink rounded-full px-6 py-3 font-medium transition-opacity disabled:opacity-40"
         >
-          {status === "loading" ? "Optimizing…" : "Optimize"}
+          {status === "loading" ? "Converting…" : "Convert"}
         </button>
-        <button type="button" onClick={reset} className="text-sm text-ink-muted hover:text-ink">
-          Choose another image
-        </button>
+        {file && (
+          <button type="button" onClick={reset} className="text-sm text-ink-muted hover:text-ink">
+            Choose another image
+          </button>
+        )}
       </div>
 
       <div role="status" aria-live="polite" className="sr-only">
-        {status === "loading" && "Optimizing image…"}
-        {status === "done" && "Optimization complete."}
+        {status === "loading" && "Converting image…"}
+        {status === "done" && "Conversion complete. Your download has started."}
         {status === "error" && errorMessage}
       </div>
 
@@ -228,50 +359,81 @@ export function Tool({ defaultFormat = "webp", lockFormat = false }: ToolProps) 
       )}
 
       {result && (
-        <dl className="font-readout grid grid-cols-2 gap-x-6 gap-y-2 rounded-xl border border-border bg-surface p-4 text-sm sm:grid-cols-4">
-          <div>
-            <dt className="text-ink-muted text-xs">Original</dt>
-            <dd>{formatBytes(result.originalBytes)}</dd>
+        <div className="border-border bg-surface flex flex-col gap-6 rounded-xl border p-4">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm font-medium">Your download has started.</p>
+            <a
+              href={result.url}
+              download={`optimized.${EXTENSIONS[format]}`}
+              className="text-primary text-sm font-medium"
+            >
+              Download again
+            </a>
           </div>
-          <div>
-            <dt className="text-ink-muted text-xs">Output</dt>
-            <dd>{formatBytes(result.outputBytes)}</dd>
-          </div>
-          <div>
-            <dt className="text-ink-muted text-xs">Saved</dt>
-            <dd>{formatPercentSaved(result.originalBytes, result.outputBytes)}</dd>
-          </div>
-          <div>
-            <dt className="text-ink-muted text-xs">Format</dt>
-            <dd>{result.format}</dd>
-          </div>
-          <div>
-            <dt className="text-ink-muted text-xs">Quality</dt>
-            <dd>{result.quality}</dd>
-          </div>
-          <div>
-            <dt className="text-ink-muted text-xs">Scale</dt>
-            <dd>{(result.scale * 100).toFixed(0)}%</dd>
-          </div>
-          <div>
-            <dt className="text-ink-muted text-xs">Time</dt>
-            <dd>{result.elapsedMs.toFixed(0)}ms</dd>
-          </div>
-          <div>
-            <dt className="text-ink-muted text-xs">Target met</dt>
-            <dd>{result.targetMet ? "Yes" : "No"}</dd>
-          </div>
-        </dl>
-      )}
 
-      {result && (
-        <a
-          href={result.url}
-          download={`optimized.${format}`}
-          className="rounded-lg border border-border px-5 py-2.5 text-center font-medium hover:bg-black/5"
-        >
-          Download
-        </a>
+          {!resultHasNoPreview && naturalSize && !previewUnsupported && (
+            <CompareSlider
+              beforeSrc={previewUrl!}
+              afterSrc={result.url}
+              naturalWidth={naturalSize.width}
+              naturalHeight={naturalSize.height}
+            />
+          )}
+
+          {/* Source couldn't preview (e.g. HEIC input) but the result format
+              can (e.g. JPG output) - show the result alone rather than a
+              full before/after slider with no "before" to show. */}
+          {!resultHasNoPreview && previewUnsupported && (
+            // eslint-disable-next-line @next/next/no-img-element -- blob: URL, see CompareSlider.tsx
+            <img
+              src={result.url}
+              alt="Converted result"
+              className="border-border w-full rounded-xl border object-contain"
+            />
+          )}
+
+          {resultHasNoPreview && (
+            <p className="text-ink-muted text-sm">
+              A preview isn&apos;t available for this file format in your browser, but the
+              download above is the real, converted file.
+            </p>
+          )}
+
+          <dl className="font-readout grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-4">
+            <div>
+              <dt className="text-ink-muted text-xs">Original</dt>
+              <dd>{formatBytes(result.originalBytes)}</dd>
+            </div>
+            <div>
+              <dt className="text-ink-muted text-xs">New Size</dt>
+              <dd>{formatBytes(result.outputBytes)}</dd>
+            </div>
+            <div>
+              <dt className="text-ink-muted text-xs">Saved</dt>
+              <dd>{formatPercentSaved(result.originalBytes, result.outputBytes)}</dd>
+            </div>
+            <div>
+              <dt className="text-ink-muted text-xs">Ratio</dt>
+              <dd>{formatCompressionRatio(result.originalBytes, result.outputBytes)}</dd>
+            </div>
+            <div>
+              <dt className="text-ink-muted text-xs">Format</dt>
+              <dd>{result.format}</dd>
+            </div>
+            <div>
+              <dt className="text-ink-muted text-xs">Quality</dt>
+              <dd>{result.quality}</dd>
+            </div>
+            <div>
+              <dt className="text-ink-muted text-xs">Time</dt>
+              <dd>{result.elapsedMs.toFixed(0)}ms</dd>
+            </div>
+            <div>
+              <dt className="text-ink-muted text-xs">Target met</dt>
+              <dd>{result.targetMet ? "Yes" : "No"}</dd>
+            </div>
+          </dl>
+        </div>
       )}
     </div>
   );
