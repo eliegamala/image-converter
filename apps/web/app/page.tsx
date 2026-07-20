@@ -133,6 +133,11 @@ const FAQS = [
     answer:
       "For most websites, WebP offers an excellent balance of quality and file size. AVIF can produce even smaller files for many images, while PNG remains useful when transparency or maximum lossless quality is required.",
   },
+  {
+    question: "Is WebP better quality than AVIF?",
+    answer:
+      "Usually not - at the same file size, AVIF tends to hold on to more fine detail and produce smoother gradients, especially in photos. WebP's real advantage is speed and near-universal browser support, not raw image quality, which is why it's still the safer default when compatibility matters more than squeezing out the last few percent.",
+  },
 ];
 
 const faqJsonLd = {
@@ -230,7 +235,7 @@ export default function Home() {
               <li key={c.slug}>
                 <Link
                   href={`/convert/${c.slug}`}
-                  className="conversion-pill dashed-pill px-4 py-1.5 text-sm"
+                  className="conversion-pill px-4 py-1.5 text-sm"
                 >
                   {c.fromLabel} to {c.toLabel}
                 </Link>
@@ -289,7 +294,10 @@ export default function Home() {
           <p className="text-ink-muted mt-2">Convert between the web&apos;s most popular image formats.</p>
           <ul className="font-readout mt-6 flex flex-wrap justify-center gap-2">
             {SUPPORTED_FORMATS.map((f) => (
-              <li key={f} className="dashed-pill px-4 py-1.5 text-sm">
+              <li
+                key={f}
+                className="border-border bg-surface text-ink-muted rounded-full border px-4 py-1.5 text-sm"
+              >
                 {f}
               </li>
             ))}

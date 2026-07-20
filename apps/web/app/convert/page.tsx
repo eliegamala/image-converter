@@ -45,6 +45,51 @@ export default function AllConvertersPage() {
             </li>
           ))}
         </ul>
+
+        <h2 className="font-display mt-16 text-xl font-bold">Other Tools</h2>
+        <p className="text-ink-muted mt-2">Beyond format-to-format conversion.</p>
+        <ul className="mt-6 grid w-full max-w-2xl gap-2 sm:grid-cols-2">
+          <li>
+            <Link
+              href="/svg-to-png"
+              className="conversion-pill border-border bg-surface block rounded-lg border px-4 py-3 text-left text-sm"
+            >
+              SVG to PNG Converter - custom size, scale &amp; background
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/png-to-svg"
+              className="conversion-pill border-border bg-surface block rounded-lg border px-4 py-3 text-left text-sm"
+            >
+              PNG to SVG Converter - real vectorization
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/image-to-base64"
+              className="conversion-pill border-border bg-surface block rounded-lg border px-4 py-3 text-left text-sm"
+            >
+              Image to Base64 Converter - copy, data URI &amp; download
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/base64-to-image"
+              className="conversion-pill border-border bg-surface block rounded-lg border px-4 py-3 text-left text-sm"
+            >
+              Base64 to Image Converter - decode &amp; convert
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/svg-optimizer"
+              className="conversion-pill border-border bg-surface block rounded-lg border px-4 py-3 text-left text-sm"
+            >
+              SVG Optimizer - minify &amp; clean up SVG markup
+            </Link>
+          </li>
+        </ul>
       </main>
       <Footer />
     </div>

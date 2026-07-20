@@ -125,7 +125,7 @@ export default async function ConversionPage({ params }: PageProps) {
             <ul className="flex flex-wrap gap-2">
               {related.map((c) => (
                 <li key={c.slug}>
-                  <Link href={`/convert/${c.slug}`} className="conversion-pill dashed-pill px-4 py-1.5 text-sm">
+                  <Link href={`/convert/${c.slug}`} className="conversion-pill px-4 py-1.5 text-sm">
                     {c.title}
                   </Link>
                 </li>

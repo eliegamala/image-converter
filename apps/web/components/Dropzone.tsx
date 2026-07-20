@@ -4,6 +4,8 @@ import { useCallback, useRef, useState, type DragEvent } from "react";
 
 interface DropzoneProps {
   onFile: (file: File) => void;
+  accept?: string;
+  label?: string;
 }
 
 function UploadIcon() {
@@ -20,7 +22,11 @@ function UploadIcon() {
   );
 }
 
-export function Dropzone({ onFile }: DropzoneProps) {
+export function Dropzone({
+  onFile,
+  accept = "image/*,.heic,.heif",
+  label = "Upload Your Image",
+}: DropzoneProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -61,16 +67,16 @@ export function Dropzone({ onFile }: DropzoneProps) {
         className="bg-primary text-primary-ink flex items-center gap-2 rounded-full px-6 py-3 font-medium whitespace-nowrap"
       >
         <UploadIcon />
-        Upload Your Image
+        {label}
       </button>
       <span className="text-ink-muted text-sm">or</span>
       <span className="text-ink text-sm font-medium">Drag and Drop</span>
       <input
         ref={inputRef}
         type="file"
-        accept="image/*,.heic,.heif"
+        accept={accept}
         className="sr-only"
-        aria-label="Upload an image"
+        aria-label={label}
         onChange={(event) => handleFiles(event.target.files)}
       />
     </div>

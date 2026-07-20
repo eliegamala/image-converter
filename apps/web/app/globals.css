@@ -115,6 +115,23 @@ body {
   color: var(--ink);
 }
 
+/* Behind a transparent PNG preview, so a transparent background actually
+   reads as transparent instead of looking like a rendering bug. */
+.checkerboard {
+  background-color: #f3f3f3;
+  background-image:
+    linear-gradient(45deg, #0000000f 25%, transparent 25%),
+    linear-gradient(-45deg, #0000000f 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #0000000f 75%),
+    linear-gradient(-45deg, transparent 75%, #0000000f 75%);
+  background-size: 20px 20px;
+  background-position:
+    0 0,
+    0 10px,
+    10px -10px,
+    -10px 0;
+}
+
 .dashed-pill {
   border: 2px dashed color-mix(in srgb, var(--ink) 25%, transparent);
   border-radius: 999px;
@@ -122,10 +139,13 @@ body {
 
 /* Interactive pill used for conversion links (Popular Converters, Related
    conversions, the All Converters index) - reads as a real control, not a
-   plain hyperlink: it lifts and fills with the brand color on hover, and
-   presses back down on click. */
+   plain hyperlink: solid ground at rest, then it lifts and fills with the
+   brand color on hover, and presses back down on click. */
 .conversion-pill {
   display: inline-block;
+  border-radius: 999px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
   color: var(--ink-muted);
   transition:
     color 0.2s ease,
