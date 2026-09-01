@@ -38,8 +38,20 @@ export default function PrivacyPage() {
           </p>
           <h2 className="text-ink mt-4 font-semibold">Analytics and cookies</h2>
           <p>
-            This site does not set tracking cookies or run third-party analytics scripts that
-            profile individual visitors.
+            cloudvertify uses Google Analytics to understand how visitors use the site, such as
+            which pages and tools are viewed and how visitors arrived here. Google Analytics uses
+            cookies and collects information like your approximate location, device and browser
+            type, and on-site activity. This data is never linked to the images you convert. You
+            can opt out using a browser extension such as the{" "}
+            <a
+              href="https://tools.google.com/dlpage/gaoptout"
+              className="text-primary font-medium"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Google Analytics Opt-out Browser Add-on
+            </a>
+            , or by blocking cookies in your browser settings.
           </p>
           <h2 className="text-ink mt-4 font-semibold">Changes to this policy</h2>
           <p>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import { JetBrains_Mono, Open_Sans, Space_Grotesk } from "next/font/google";
 import { Header } from "@/components/Header";
 import "./globals.css";
@@ -27,6 +28,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -80,6 +82,7 @@ export default function RootLayout({
         <Header />
         {children}
       </body>
+      {GA_MEASUREMENT_ID && <GoogleAnalytics gaId={GA_MEASUREMENT_ID} />}
     </html>
   );
 }
