@@ -45,6 +45,9 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
   },
+  verification: {
+    google: "wDsT2GxYz85GMgcDa37NIEGqD-2yM8F8qCt6cc7ZSqE",
+  },
 };
 
 const softwareApplicationJsonLd = {
