@@ -2,13 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
 import { CONVERSIONS } from "@/content/conversions";
 
 export const metadata: Metadata = {
   title: "All Image Converters",
   description:
-    "Every image conversion supported by ImageConvert - JPG, PNG, WebP, AVIF and HEIC, converted between each other with automatic quality optimization.",
+    "Every image conversion supported by cloudvertify - JPG, PNG, WebP, AVIF and HEIC, converted between each other with automatic quality optimization.",
   alternates: { canonical: "/convert" },
 };
 
@@ -16,16 +15,15 @@ export default function AllConvertersPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <div className="hero-dark">
-        <Header />
-        <div className="mx-auto max-w-3xl px-6 pt-2 pb-16 text-center">
+        <div className="mx-auto max-w-3xl px-6 pt-16 pb-16 text-center">
           <div className="mb-6 flex justify-center">
-            <Breadcrumb items={[{ label: "ImageConvert", href: "/" }, { label: "Tools" }]} />
+            <Breadcrumb items={[{ label: "cloudvertify", href: "/" }, { label: "Tools" }]} />
           </div>
           <h1 className="font-display text-ink text-4xl font-semibold sm:text-5xl">
             All Image Converters
           </h1>
           <p className="text-ink/70 mt-4">
-            Every conversion pair supported by ImageConvert. Each one runs the same intelligent
+            Every conversion pair supported by cloudvertify. Each one runs the same intelligent
             optimization engine - automatic quality search, optional target file size, and no
             image ever stored.
           </p>
@@ -87,6 +85,30 @@ export default function AllConvertersPage() {
               className="conversion-pill border-border bg-surface block rounded-lg border px-4 py-3 text-left text-sm"
             >
               SVG Optimizer - minify &amp; clean up SVG markup
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/favicon-generator"
+              className="conversion-pill border-border bg-surface block rounded-lg border px-4 py-3 text-left text-sm"
+            >
+              Favicon Generator - full favicon.ico &amp; PWA icon package
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/responsive-image-generator"
+              className="conversion-pill border-border bg-surface block rounded-lg border px-4 py-3 text-left text-sm"
+            >
+              Responsive Image Generator - srcset &amp; picture HTML
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/resize-image-to-100kb"
+              className="conversion-pill border-border bg-surface block rounded-lg border px-4 py-3 text-left text-sm"
+            >
+              Resize Image to 100KB - passport photos &amp; government forms
             </Link>
           </li>
         </ul>

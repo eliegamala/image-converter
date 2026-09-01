@@ -9,6 +9,9 @@ const TOOLS_LINKS = [
   { label: "Image to Base64 Converter", href: "/image-to-base64" },
   { label: "Base64 to Image Converter", href: "/base64-to-image" },
   { label: "SVG Optimizer", href: "/svg-optimizer" },
+  { label: "Favicon Generator", href: "/favicon-generator" },
+  { label: "Responsive Image Generator", href: "/responsive-image-generator" },
+  { label: "Resize Image to 100KB", href: "/resize-image-to-100kb" },
 ];
 
 const COMPANY_LINKS = [
@@ -22,8 +25,8 @@ export function Footer() {
     <footer className="on-dark mt-24 w-full">
       <div className="mx-auto grid max-w-6xl gap-10 px-6 py-16 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <span className="font-display text-lg font-extrabold tracking-tight uppercase">
-            ImageConvert
+          <span className="font-display text-lg font-bold">
+            cloud<span className="text-primary">vertify</span>
           </span>
           <p className="text-ink-muted mt-3 max-w-xs text-sm leading-relaxed">
             Convert, compress and optimize images online for free. Nothing you upload is stored.
@@ -90,7 +93,7 @@ export function Footer() {
 
       <div className="border-border border-t">
         <p className="text-ink-muted mx-auto max-w-6xl px-6 py-6 text-xs">
-          © {new Date().getFullYear()} ImageConvert. No account required. No images stored.
+          © {new Date().getFullYear()} cloudvertify. No account required. No images stored.
         </p>
       </div>
     </footer>

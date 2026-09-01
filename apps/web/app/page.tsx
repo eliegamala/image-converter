@@ -214,7 +214,7 @@ export default function Home() {
                     <span className="font-readout text-primary w-10 shrink-0 text-sm">
                       {ROMAN[index]}
                     </span>
-                    <span className="font-display flex-1 text-2xl font-extrabold uppercase tracking-tight sm:text-3xl">
+                    <span className="font-display flex-1 text-2xl font-bold sm:text-3xl">
                       {cap.title}
                     </span>
                     <span className="text-ink-muted max-w-xs text-sm sm:text-right">
@@ -273,7 +273,7 @@ export default function Home() {
                     <span className="font-readout text-primary w-10 shrink-0 text-sm">
                       {ROMAN[index]}
                     </span>
-                    <span className="font-display flex-1 text-2xl font-extrabold uppercase tracking-tight sm:text-3xl">
+                    <span className="font-display flex-1 text-2xl font-bold sm:text-3xl">
                       {item.title}
                     </span>
                     <span className="text-ink-muted max-w-xs text-sm sm:text-right">

@@ -3,7 +3,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
 import { Tool } from "@/components/Tool";
 import { CONVERSIONS, getConversionBySlug } from "@/content/conversions";
 
@@ -53,7 +52,7 @@ export default async function ConversionPage({ params }: PageProps) {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "ImageConvert", item: "/" },
+      { "@type": "ListItem", position: 1, name: "cloudvertify", item: "/" },
       { "@type": "ListItem", position: 2, name: "Tools", item: "/convert" },
       {
         "@type": "ListItem",
@@ -80,12 +79,11 @@ export default async function ConversionPage({ params }: PageProps) {
       />
 
       <div className="hero-dark">
-        <Header />
-        <div className="mx-auto max-w-3xl px-6 pt-2 pb-16 text-center">
+        <div className="mx-auto max-w-3xl px-6 pt-16 pb-16 text-center">
           <div className="mb-6 flex justify-center">
             <Breadcrumb
               items={[
-                { label: "ImageConvert", href: "/" },
+                { label: "cloudvertify", href: "/" },
                 { label: "Tools", href: "/convert" },
                 { label: conversion.title },
               ]}

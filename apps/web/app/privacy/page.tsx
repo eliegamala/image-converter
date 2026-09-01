@@ -1,24 +1,22 @@
 import type { Metadata } from "next";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: "How ImageConvert handles the images and data you upload.",
+  description: "How cloudvertify handles the images and data you upload.",
   alternates: { canonical: "/privacy" },
 };
 
 export default function PrivacyPage() {
   return (
     <div className="flex min-h-screen flex-col">
-      <Header />
-      <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-12">
-        <Breadcrumb items={[{ label: "ImageConvert", href: "/" }, { label: "Privacy Policy" }]} />
+      <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-16">
+        <Breadcrumb items={[{ label: "cloudvertify", href: "/" }, { label: "Privacy Policy" }]} />
         <h1 className="font-display mt-6 text-3xl font-bold">Privacy Policy</h1>
         <div className="text-ink-muted mt-6 flex flex-col gap-4 text-sm leading-relaxed">
           <p>
-            ImageConvert converts and compresses images entirely through a server-side
+            cloudvertify converts and compresses images entirely through a server-side
             optimization engine. This page explains exactly what happens to your data.
           </p>
           <h2 className="text-ink mt-4 font-semibold">Images you upload</h2>
@@ -29,7 +27,7 @@ export default function PrivacyPage() {
           </p>
           <h2 className="text-ink mt-4 font-semibold">Accounts and sign-up</h2>
           <p>
-            ImageConvert does not require an account, a login, or any personal information to
+            cloudvertify does not require an account, a login, or any personal information to
             convert an image.
           </p>
           <h2 className="text-ink mt-4 font-semibold">Local storage</h2>

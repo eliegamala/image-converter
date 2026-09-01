@@ -3,7 +3,6 @@ import Link from "next/link";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { FaqAccordion } from "@/components/FaqAccordion";
 import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
 import { PngToSvgTool } from "@/components/PngToSvgTool";
 
 export const metadata: Metadata = {
@@ -65,7 +64,7 @@ const breadcrumbJsonLd = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   itemListElement: [
-    { "@type": "ListItem", position: 1, name: "ImageConvert", item: "/" },
+    { "@type": "ListItem", position: 1, name: "cloudvertify", item: "/" },
     { "@type": "ListItem", position: 2, name: "Tools", item: "/convert" },
     { "@type": "ListItem", position: 3, name: "PNG to SVG Converter", item: "/png-to-svg" },
   ],
@@ -84,12 +83,11 @@ export default function PngToSvgPage() {
       />
 
       <div className="hero-dark">
-        <Header />
-        <div className="mx-auto max-w-3xl px-6 pt-2 pb-16 text-center">
+        <div className="mx-auto max-w-3xl px-6 pt-16 pb-16 text-center">
           <div className="mb-6 flex justify-center">
             <Breadcrumb
               items={[
-                { label: "ImageConvert", href: "/" },
+                { label: "cloudvertify", href: "/" },
                 { label: "Tools", href: "/convert" },
                 { label: "PNG to SVG Converter" },
               ]}
@@ -143,6 +141,21 @@ export default function PngToSvgPage() {
             <li>
               <Link href="/svg-optimizer" className="conversion-pill px-4 py-1.5 text-sm">
                 SVG Optimizer
+              </Link>
+            </li>
+            <li>
+              <Link href="/favicon-generator" className="conversion-pill px-4 py-1.5 text-sm">
+                Favicon Generator
+              </Link>
+            </li>
+            <li>
+              <Link href="/responsive-image-generator" className="conversion-pill px-4 py-1.5 text-sm">
+                Responsive Image Generator
+              </Link>
+            </li>
+            <li>
+              <Link href="/resize-image-to-100kb" className="conversion-pill px-4 py-1.5 text-sm">
+                Resize Image to 100KB
               </Link>
             </li>
             <li>

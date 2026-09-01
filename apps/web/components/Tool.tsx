@@ -64,6 +64,9 @@ interface ToolProps {
   /** Landing pages promise a specific conversion - don't let the
    * auto-recommendation override that choice, just show it as a hint. */
   lockFormat?: boolean;
+  /** Pre-selects a target size (e.g. landing pages promising "to 100KB")
+   * instead of the default "Best Quality" auto mode. */
+  defaultTargetKB?: number | null;
   /** Lets a hero section hide its decorative artwork once a real file is
    * selected, instead of showing both at once. */
   onFileChange?: (hasFile: boolean) => void;
@@ -82,12 +85,13 @@ export function Tool({
   defaultFormat = "webp",
   defaultSourceFormat = "auto",
   lockFormat = false,
+  defaultTargetKB = null,
   onFileChange,
 }: ToolProps) {
   const [sourceFormat, setSourceFormat] = useState(defaultSourceFormat);
   const [format, setFormat] = useState<ImageFormat>(defaultFormat);
   const [recommendedFormat, setRecommendedFormat] = useState<ImageFormat | null>(null);
-  const [targetKB, setTargetKB] = useState<number | null>(null);
+  const [targetKB, setTargetKB] = useState<number | null>(defaultTargetKB);
 
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -420,6 +424,15 @@ export function Tool({
               <dt className="text-ink-muted text-xs">Format</dt>
               <dd>{result.format}</dd>
             </div>
+            {naturalSize && (
+              <div>
+                <dt className="text-ink-muted text-xs">Dimensions</dt>
+                <dd>
+                  {Math.round(naturalSize.width * result.scale)}×
+                  {Math.round(naturalSize.height * result.scale)}
+                </dd>
+              </div>
+            )}
             <div>
               <dt className="text-ink-muted text-xs">Quality</dt>
               <dd>{result.quality}</dd>

@@ -1,29 +1,21 @@
 import type { Metadata } from "next";
-import { Big_Shoulders, Fraunces, Inter, JetBrains_Mono } from "next/font/google";
+import { JetBrains_Mono, Open_Sans, Space_Grotesk } from "next/font/google";
+import { Header } from "@/components/Header";
 import "./globals.css";
 
 // next/font/google downloads and self-hosts these at build time - the
 // browser never makes a runtime request to Google Fonts, which removes the
 // extra external round trip the original prototype had (see DEVELOPMENT.md
 // 2: "Fonts (Google Fonts CDN)").
-const bigShoulders = Big_Shoulders({
-  variable: "--font-shoulders",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
   subsets: ["latin"],
-  weight: "variable",
-  axes: ["opsz"],
+  weight: ["500", "600", "700"],
   display: "swap",
 });
 
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
-  subsets: ["latin"],
-  style: ["italic"],
-  weight: ["400", "500"],
-  display: "swap",
-});
-
-const inter = Inter({
-  variable: "--font-inter",
+const openSans = Open_Sans({
+  variable: "--font-open-sans",
   subsets: ["latin"],
   display: "swap",
 });
@@ -40,13 +32,13 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     default: "Image Converter – Convert, Compress & Optimize Images Online",
-    template: "%s — ImageConvert",
+    template: "%s — cloudvertify",
   },
   description:
     "Convert JPG, PNG, WebP, AVIF and HEIC images online. Compress and optimize images without losing quality. Fast, free, secure and no registration required.",
   openGraph: {
     type: "website",
-    siteName: "ImageConvert",
+    siteName: "cloudvertify",
   },
   twitter: {
     card: "summary_large_image",
@@ -56,7 +48,7 @@ export const metadata: Metadata = {
 const softwareApplicationJsonLd = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  name: "ImageConvert",
+  name: "cloudvertify",
   applicationCategory: "MultimediaApplication",
   operatingSystem: "Any (web-based)",
   offers: {
@@ -76,7 +68,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${bigShoulders.variable} ${fraunces.variable} ${inter.variable} ${jetbrainsMono.variable}`}
+      className={`${spaceGrotesk.variable} ${openSans.variable} ${jetbrainsMono.variable}`}
     >
       <head>
         <script
@@ -84,7 +76,10 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationJsonLd) }}
         />
       </head>
-      <body className="min-h-screen antialiased">{children}</body>
+      <body className="min-h-screen antialiased">
+        <Header />
+        {children}
+      </body>
     </html>
   );
 }

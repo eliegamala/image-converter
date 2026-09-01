@@ -1,22 +1,33 @@
 @import "tailwindcss";
 
 :root {
-  /* Default, daylight surface. */
-  --light-bg: #f6f7fb;
+  /* Default, daylight surface - the site's primary ground. */
+  --light-bg: #f7f7fb;
   --light-surface: #ffffff;
-  --light-ink: #14141f;
-  --light-ink-muted: #5b5f73;
-  --light-border: #e4e4ee;
+  --light-ink: #100f1c;
+  --light-ink-muted: #5f5b56;
+  --light-border: #e7e4f2;
 
-  /* Used by sections that go on a solid black ground. */
-  --dark-bg: #000000;
-  --dark-surface: #111114;
-  --dark-ink: #f6f7fb;
-  --dark-ink-muted: rgba(246, 247, 251, 0.6);
-  --dark-border: rgba(246, 247, 251, 0.14);
+  /* The "alternate" section ground - still light (the whole site is one
+     light glass theme now, no dark mode), just a touch more saturated and
+     lavender-tinted than the base, with soft color-blob glow behind it, so
+     alternating sections and glass cards both still read against it. */
+  --dark-bg: #efecfc;
+  --dark-surface: #ffffff;
+  --dark-ink: #100f1c;
+  --dark-ink-muted: #5f5b56cc;
+  --dark-border: #ddd7f4;
 
-  /* Brand accent - constant across both grounds. */
-  --brand-blue: #0000ff;
+  /* Brand accent - a single violet-blue used everywhere, light glow color
+     included for blob backgrounds and focus/hover states. */
+  --brand-blue: #4f39f6;
+  --brand-blue-light: #615fff;
+  --brand-gold: #f5b83d;
+  --brand-teal: #2dc8b4;
+
+  /* Solid ground for the sticky header - deliberately opaque (not glass)
+     so it reads cleanly against whatever's scrolling underneath it. */
+  --header-bg: #e7e4f2;
 
   /* Active tokens: default to light, overridden per-section below. */
   --bg: var(--light-bg);
@@ -28,9 +39,9 @@
   --primary-ink: #ffffff;
   --accent: var(--brand-blue);
   --signal-before: #c2650a;
-  --signal-after: var(--brand-blue);
+  --signal-after: #12897a;
   --focus: var(--brand-blue);
-  --danger: #c53a3a;
+  --danger: #d1364c;
 }
 
 @theme inline {
@@ -46,9 +57,8 @@
   --color-signal-after: var(--signal-after);
   --color-focus: var(--focus);
   --color-danger: var(--danger);
-  --font-display: var(--font-shoulders);
-  --font-accent: var(--font-fraunces);
-  --font-body: var(--font-inter);
+  --font-display: var(--font-space-grotesk);
+  --font-body: var(--font-open-sans);
   --font-readout: var(--font-jetbrains-mono);
 }
 
@@ -66,10 +76,10 @@ body {
   font-family: var(--font-display), var(--font-body), system-ui, sans-serif;
 }
 
+/* An emphasized word within a heading - solid brand color, same weight as
+   its surroundings, no italic/serif flourish. Matches the reference: color
+   does the emphasis, not a second typeface. */
 .font-accent {
-  font-family: var(--font-accent), Georgia, serif;
-  font-style: italic;
-  font-weight: 400;
   color: var(--brand-blue);
 }
 
@@ -78,22 +88,42 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Sections that sit on a solid black ground - light ink. Applying this
+/* Sections that sit on the tinted "alternate" ground. Applying this
    re-points the same --ink/--surface/--border tokens every component
    already reads, so nested content re-themes automatically instead of
-   needing dark-mode variants hand-written per component. */
+   needing variants hand-written per component. Also carries the soft
+   color-blob glow that gives the glass cards something to float over. */
 .on-dark {
   --bg: var(--dark-bg);
   --surface: var(--dark-surface);
   --ink: var(--dark-ink);
   --ink-muted: var(--dark-ink-muted);
   --border: var(--dark-border);
+  position: relative;
   background-color: var(--bg);
   color: var(--ink);
 }
 
-/* The inverse: forces light tokens back on, for a card (like the tool
-   itself) that should always read as a light surface even when it's
+.on-dark::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(480px circle at 12% 15%, color-mix(in srgb, var(--brand-blue) 20%, transparent), transparent 60%),
+    radial-gradient(420px circle at 88% 12%, color-mix(in srgb, var(--brand-gold) 22%, transparent), transparent 55%),
+    radial-gradient(460px circle at 78% 88%, color-mix(in srgb, var(--brand-teal) 18%, transparent), transparent 55%);
+  filter: blur(4px);
+}
+
+.on-dark > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* The inverse: forces base-light tokens back on, for a card (like the tool
+   itself) that should always read as a plain light surface even when it's
    nested inside an .on-dark section. */
 .on-light {
   --bg: var(--light-bg);
@@ -104,15 +134,79 @@ body {
   color: var(--ink);
 }
 
-/* The hero band - plain black, no pattern or gradient. */
+/* The sticky site header: a solid (not glass) bar in --header-bg, so it
+   stays legible against whatever section is scrolling underneath it once
+   stuck, with a hairline border and soft shadow to read as a distinct,
+   elevated layer rather than blending into the page. The nav/CTA pills
+   inside still use .glass-pill, so they read as controls floating on top
+   of this bar. */
+.header-shell {
+  --bg: var(--dark-bg);
+  --surface: var(--dark-surface);
+  --ink: var(--dark-ink);
+  --ink-muted: var(--dark-ink-muted);
+  --border: var(--dark-border);
+  color: var(--ink);
+  background-color: var(--header-bg);
+  box-shadow:
+    0 1px 0 0 color-mix(in srgb, var(--light-ink) 8%, transparent),
+    0 12px 24px -18px color-mix(in srgb, var(--light-ink) 25%, transparent);
+}
+
+/* The hero band - the tinted ground plus a bigger, brighter blob glow
+   since it's the first thing on the page. */
 .hero-dark {
   --bg: var(--dark-bg);
   --surface: var(--dark-surface);
   --ink: var(--dark-ink);
   --ink-muted: var(--dark-ink-muted);
   --border: var(--dark-border);
+  position: relative;
+  overflow: hidden;
   background-color: var(--dark-bg);
   color: var(--ink);
+}
+
+.hero-dark::before {
+  content: "";
+  position: absolute;
+  inset: -10% -10% auto -10%;
+  height: 130%;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(640px circle at 18% 20%, color-mix(in srgb, var(--brand-blue) 26%, transparent), transparent 60%),
+    radial-gradient(560px circle at 85% 8%, color-mix(in srgb, var(--brand-gold) 24%, transparent), transparent 55%),
+    radial-gradient(600px circle at 75% 90%, color-mix(in srgb, var(--brand-teal) 20%, transparent), transparent 55%);
+  filter: blur(6px);
+}
+
+.hero-dark > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* A translucent, blurred "glass" surface - the core visual signature of
+   this theme. Used for pills, badges and the floating header. Recipe
+   matches a real glassmorphism pill: hairline light border, ~50% white
+   fill, heavy blur so whatever's behind it (usually a color blob) shows
+   through softened rather than sharp. */
+.glass-pill {
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 8px 24px -14px rgba(24, 16, 60, 0.35);
+}
+
+/* The larger-format equivalent of .glass-pill, for cards rather than
+   pills/badges - same frosted-glass fill and blur, softer corners. */
+.glass-card {
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 24px 48px -28px rgba(24, 16, 60, 0.35);
 }
 
 /* Behind a transparent PNG preview, so a transparent background actually
@@ -139,13 +233,15 @@ body {
 
 /* Interactive pill used for conversion links (Popular Converters, Related
    conversions, the All Converters index) - reads as a real control, not a
-   plain hyperlink: solid ground at rest, then it lifts and fills with the
+   plain hyperlink: glass ground at rest, then it lifts and fills with the
    brand color on hover, and presses back down on click. */
 .conversion-pill {
   display: inline-block;
   border-radius: 999px;
   border: 1.5px solid var(--border);
-  background: var(--surface);
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   color: var(--ink-muted);
   transition:
     color 0.2s ease,
@@ -195,8 +291,8 @@ body {
   }
 }
 
-/* A row that inverts from dark ground to a light card on hover/focus, used
-   by the capability list and "Why Choose Us". */
+/* A row that inverts from the tinted ground to a plain white card on
+   hover/focus, used by the capability list and "Why Choose Us". */
 .flip-row {
   position: relative;
   display: block;

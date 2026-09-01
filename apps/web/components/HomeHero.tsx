@@ -1,21 +1,20 @@
-import { Header } from "@/components/Header";
 import { Tool } from "@/components/Tool";
 
 export function HomeHero() {
   return (
     <div className="hero-dark">
-      <Header />
-
-      <div className="mx-auto max-w-4xl px-6 pt-4 pb-20 text-center sm:pb-24">
-        <p className="font-readout text-ink-muted text-[11px] tracking-[0.3em] uppercase">
+      <div className="mx-auto max-w-4xl px-6 pt-16 pb-20 text-center sm:pb-24">
+        <span className="glass-pill font-readout text-ink-muted inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[11px] tracking-[0.2em] uppercase">
+          <span className="bg-primary h-1.5 w-1.5 rounded-full" />
           Free online image converter
-        </p>
-        <h1 className="font-display text-ink mt-4 text-4xl leading-[1.05] font-extrabold uppercase tracking-tight sm:text-5xl">
+        </span>
+
+        <h1 className="font-display text-ink mt-6 text-4xl leading-[1.1] font-bold tracking-tight sm:text-5xl">
           <span className="reveal-row">
             <span style={{ animationDelay: "0.05s" }}>Convert, compress, and</span>
           </span>
           <span className="reveal-row">
-            <span className="font-accent normal-case" style={{ animationDelay: "0.18s" }}>
+            <span className="font-accent" style={{ animationDelay: "0.18s" }}>
               download
             </span>{" "}
             <span style={{ animationDelay: "0.18s" }}>in one step.</span>
@@ -26,7 +25,7 @@ export function HomeHero() {
           TIFF file - your converted image downloads automatically.
         </p>
 
-        <div className="on-light border-border bg-surface mt-10 rounded-2xl border p-6 text-left shadow-xl sm:p-8">
+        <div className="glass-card on-light mt-10 rounded-3xl p-6 text-left sm:p-8">
           <Tool />
         </div>
       </div>
