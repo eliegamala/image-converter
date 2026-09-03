@@ -244,11 +244,11 @@ export function ResponsiveImageGeneratorTool() {
           onFile={handleFile}
           accept="image/png,image/jpeg,image/webp,image/avif,image/svg+xml,.png,.jpg,.jpeg,.webp,.avif,.svg"
           label="Upload Your Image"
+          selectedFile={file}
         />
-        {file && (
+        {naturalSize && (
           <p className="text-ink-muted mt-2 text-xs">
-            Selected: {file.name} ({formatBytes(file.size)})
-            {naturalSize && ` · ${naturalSize.width}×${naturalSize.height}px`}
+            {naturalSize.width}×{naturalSize.height}px
           </p>
         )}
         {!file && (

@@ -112,12 +112,8 @@ export function ImageToBase64Tool() {
           onFile={handleFile}
           accept="image/*,.svg,.bmp,.tif,.tiff"
           label="Upload Your Image"
+          selectedFile={file}
         />
-        {file && (
-          <p className="text-ink-muted mt-2 text-xs">
-            Selected: {file.name} ({formatBytes(file.size)})
-          </p>
-        )}
       </div>
 
       <div role="status" aria-live="polite" className="sr-only">

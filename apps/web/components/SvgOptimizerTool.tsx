@@ -155,12 +155,12 @@ export function SvgOptimizerTool() {
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 text-left">
       <div>
-        <Dropzone onFile={handleFile} accept="image/svg+xml,.svg" label="Upload Your SVG" />
-        {file && (
-          <p className="text-ink-muted mt-2 text-xs">
-            Selected: {file.name} ({formatBytes(file.size)})
-          </p>
-        )}
+        <Dropzone
+          onFile={handleFile}
+          accept="image/svg+xml,.svg"
+          label="Upload Your SVG"
+          selectedFile={file}
+        />
       </div>
 
       <div role="status" aria-live="polite" className="sr-only">

@@ -282,12 +282,12 @@ export function PngToSvgTool() {
       </div>
 
       <div>
-        <Dropzone onFile={handleFile} accept="image/png,.png" label="Upload Your PNG" />
-        {file && (
-          <p className="text-ink-muted mt-2 text-xs">
-            Selected: {file.name} ({formatBytes(file.size)})
-          </p>
-        )}
+        <Dropzone
+          onFile={handleFile}
+          accept="image/png,.png"
+          label="Upload Your PNG"
+          selectedFile={file}
+        />
       </div>
 
       <div className="flex items-center gap-3">

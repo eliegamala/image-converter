@@ -356,11 +356,11 @@ export function FaviconGeneratorTool() {
           onFile={handleFile}
           accept="image/png,image/jpeg,image/webp,image/svg+xml,.png,.jpg,.jpeg,.webp,.svg"
           label="Upload Your Logo"
+          selectedFile={file}
         />
-        {file && (
+        {naturalSize && (
           <p className="text-ink-muted mt-2 text-xs">
-            Selected: {file.name} ({formatBytes(file.size)})
-            {naturalSize && ` · ${naturalSize.width}×${naturalSize.height}px`}
+            {naturalSize.width}×{naturalSize.height}px
           </p>
         )}
         {!file && (

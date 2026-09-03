@@ -320,12 +320,7 @@ export function Tool({
       </div>
 
       <div>
-        <Dropzone onFile={handleFile} />
-        {file && (
-          <p className="text-ink-muted mt-2 text-xs">
-            Selected: {file.name} ({formatBytes(file.size)})
-          </p>
-        )}
+        <Dropzone onFile={handleFile} selectedFile={file} />
         {previewUnsupported && !result && (
           <p className="text-ink-muted mt-2 text-xs">
             Your browser can&apos;t preview this file format directly, but it will still convert
