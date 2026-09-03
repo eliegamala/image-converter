@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: cloudvertify-api
+    env: docker
+    dockerfilePath: apps/api/Dockerfile
+    dockerContext: apps/api
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: ALLOWED_ORIGINS
+        value: https://cloudvertify.com
