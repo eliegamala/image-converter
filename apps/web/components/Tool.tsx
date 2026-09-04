@@ -54,6 +54,18 @@ const EXTENSIONS: Record<ImageFormat, string> = {
 // trying to preview the result for these rather than show a broken image.
 const NO_PREVIEW_FORMATS = new Set<ImageFormat>(["tiff", "pdf"]);
 
+// PNG/GIF are lossless with no quality knob - the backend repurposes the
+// quality field to mean "palette colors used" for these two only (see
+// apps/api/app/compression/{png,gif}.py). Matched against result.format
+// (the backend's uppercase x-format header), not the lowercase ImageFormat
+// values used elsewhere in this file.
+const PALETTE_BASED_FORMATS = new Set(["PNG", "GIF"]);
+
+// Both are lossless - no quality setting can shrink real photographic
+// detail the way a lossy encode can, so a photo converted to either will
+// often come out larger than a compressed (JPEG/HEIC/WebP/AVIF) original.
+const LOSSLESS_FORMATS = new Set(["PNG", "GIF", "BMP", "TIFF"]);
+
 const SIZE_PRESETS_KB = [20, 50, 100, 200];
 
 type Status = "idle" | "loading" | "done" | "error";
@@ -429,6 +441,52 @@ export function Tool({
             </a>
           </div>
 
+          {result.outputBytes > result.originalBytes && (
+            <div className="border-signal-before/40 bg-signal-before/10 flex items-start gap-2.5 rounded-lg border px-3 py-2.5 text-sm">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+                className="text-signal-before mt-0.5 shrink-0"
+              >
+                <path
+                  d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <p className="text-ink-muted">
+                This {result.format} file is larger than your original.{" "}
+                {LOSSLESS_FORMATS.has(result.format) ? (
+                  <>
+                    {result.format} is a lossless format, so converting a photo to it often
+                    produces a bigger file than a compressed original - that&apos;s expected, not
+                    an error.
+                  </>
+                ) : (
+                  <>The source was likely already compressed more than this setting allows.</>
+                )}{" "}
+                {recommendedFormat && recommendedFormat !== format && (
+                  <>
+                    For a smaller file, try{" "}
+                    <button
+                      type="button"
+                      onClick={() => selectFormat(recommendedFormat)}
+                      className="text-primary font-medium underline"
+                    >
+                      {OUTPUT_FORMATS.find((f) => f.value === recommendedFormat)?.label}
+                    </button>{" "}
+                    instead.
+                  </>
+                )}
+              </p>
+            </div>
+          )}
+
           {!resultHasNoPreview && naturalSize && !previewUnsupported && (
             <CompareSlider
               beforeSrc={previewUrl!}
@@ -488,8 +546,20 @@ export function Tool({
               </div>
             )}
             <div>
-              <dt className="text-ink-muted text-xs">Quality</dt>
-              <dd>{result.quality}</dd>
+              {/* PNG/GIF have no quality knob - the backend repurposes this
+                  field to mean "palette colors used" for them instead (see
+                  apps/api/app/compression/png.py), which reads as a bug
+                  ("Quality: 256"?) if labeled the same as JPEG/WebP/AVIF. */}
+              <dt className="text-ink-muted text-xs">
+                {PALETTE_BASED_FORMATS.has(result.format) ? "Colors" : "Quality"}
+              </dt>
+              <dd>
+                {PALETTE_BASED_FORMATS.has(result.format)
+                  ? result.quality >= 256
+                    ? "Full color"
+                    : `${result.quality} colors`
+                  : result.quality}
+              </dd>
             </div>
             <div>
               <dt className="text-ink-muted text-xs">Time</dt>
