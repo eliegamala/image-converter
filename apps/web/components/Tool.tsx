@@ -101,10 +101,13 @@ export function Tool({
   const [result, setResult] = useState<OptimizeResult | null>(null);
   const [status, setStatus] = useState<Status>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [progress, setProgress] = useState(0);
 
   const previewUrlRef = useRef<string | null>(null);
   const resultUrlRef = useRef<string | null>(null);
   const userTouchedFormatRef = useRef(false);
+  const progressTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const maxProgressRef = useRef(0);
 
   const handleFile = useCallback(
     (newFile: File) => {
@@ -158,6 +161,7 @@ export function Tool({
     return () => {
       if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
       if (resultUrlRef.current) URL.revokeObjectURL(resultUrlRef.current);
+      if (progressTimerRef.current) clearInterval(progressTimerRef.current);
     };
   }, []);
 
@@ -169,6 +173,7 @@ export function Tool({
   function reset() {
     if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
     if (resultUrlRef.current) URL.revokeObjectURL(resultUrlRef.current);
+    if (progressTimerRef.current) clearInterval(progressTimerRef.current);
     previewUrlRef.current = null;
     resultUrlRef.current = null;
     setFile(null);
@@ -177,6 +182,7 @@ export function Tool({
     setResult(null);
     setStatus("idle");
     setErrorMessage(null);
+    setProgress(0);
     onFileChange?.(false);
   }
 
@@ -184,15 +190,46 @@ export function Tool({
     if (!file) return;
     setStatus("loading");
     setErrorMessage(null);
+    setProgress(0);
+    maxProgressRef.current = 0;
+
+    const bumpProgress = (value: number) => {
+      if (value > maxProgressRef.current) {
+        maxProgressRef.current = value;
+        setProgress(value);
+      }
+    };
+
+    // Real upload progress only fires reliably for larger files - a small
+    // image (the common case) is sent as a single packet with no
+    // intermediate progress events at all, which would otherwise leave the
+    // bar frozen at 0% for the whole request. This time-based ease toward
+    // 92% runs unconditionally from the moment the request starts so the
+    // bar always keeps moving; real upload progress (when it does fire)
+    // can only push it forward, never backward, via bumpProgress's max.
+    const startedAt = Date.now();
+    progressTimerRef.current = setInterval(() => {
+      const elapsed = Date.now() - startedAt;
+      bumpProgress(92 * (1 - Math.exp(-elapsed / 2500)));
+    }, 200);
+
     try {
       const targetBytes = targetKB ? targetKB * 1024 : undefined;
-      const optimized = await optimizeImage(file, format, targetBytes);
+      const optimized = await optimizeImage(file, format, targetBytes, (fraction) => {
+        bumpProgress(fraction * 40);
+      });
+      if (progressTimerRef.current) clearInterval(progressTimerRef.current);
+      progressTimerRef.current = null;
+      setProgress(100);
       if (resultUrlRef.current) URL.revokeObjectURL(resultUrlRef.current);
       resultUrlRef.current = optimized.url;
       setResult(optimized);
       setStatus("done");
       triggerDownload(optimized.url, `optimized.${EXTENSIONS[format]}`);
     } catch (err) {
+      if (progressTimerRef.current) clearInterval(progressTimerRef.current);
+      progressTimerRef.current = null;
+      setProgress(0);
       const message = err instanceof OptimizeError ? err.message : "Something went wrong. Try again.";
       setErrorMessage(message);
       setStatus("error");
@@ -338,12 +375,34 @@ export function Tool({
         >
           {status === "loading" ? "Converting…" : "Convert"}
         </button>
-        {file && (
+        {file && status !== "loading" && (
           <button type="button" onClick={reset} className="text-sm text-ink-muted hover:text-ink">
             Choose another image
           </button>
         )}
       </div>
+
+      {status === "loading" && (
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-ink-muted font-medium">Converting…</span>
+            <span className="font-readout text-ink-muted">{Math.round(progress)}%</span>
+          </div>
+          <div
+            role="progressbar"
+            aria-label="Conversion progress"
+            aria-valuenow={Math.round(progress)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            className="bg-border h-2 w-full overflow-hidden rounded-full"
+          >
+            <div
+              className="bg-primary h-full rounded-full transition-[width] duration-200 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+      )}
 
       <div role="status" aria-live="polite" className="sr-only">
         {status === "loading" && "Converting image…"}

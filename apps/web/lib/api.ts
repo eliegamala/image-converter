@@ -40,10 +40,17 @@ export async function recommendFormat(file: File): Promise<ImageFormat | null> {
   }
 }
 
-export async function optimizeImage(
+/**
+ * Uses XMLHttpRequest rather than fetch specifically for `upload.onprogress`
+ * - fetch has no cross-browser way to observe request-body upload progress,
+ * which is what lets the UI show a real (not simulated) percentage while
+ * the file is sent.
+ */
+export function optimizeImage(
   file: File,
   format: ImageFormat,
-  targetBytes?: number
+  targetBytes?: number,
+  onUploadProgress?: (fraction: number) => void
 ): Promise<OptimizeResult> {
   const body = new FormData();
   body.append("file", file);
@@ -52,33 +59,47 @@ export async function optimizeImage(
     body.append("target_bytes", String(Math.round(targetBytes)));
   }
 
-  const response = await fetch(`${API_URL}/api/optimize`, {
-    method: "POST",
-    body,
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${API_URL}/api/optimize`);
+    xhr.responseType = "blob";
+
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) onUploadProgress?.(event.loaded / event.total);
+    };
+
+    xhr.onload = async () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        const blob = xhr.response as Blob;
+        resolve({
+          blob,
+          url: URL.createObjectURL(blob),
+          originalBytes: Number(xhr.getResponseHeader("x-original-bytes") ?? 0),
+          outputBytes: Number(xhr.getResponseHeader("x-output-bytes") ?? blob.size),
+          quality: Number(xhr.getResponseHeader("x-quality") ?? 0),
+          scale: Number(xhr.getResponseHeader("x-scale") ?? 1),
+          format: xhr.getResponseHeader("x-format") ?? format.toUpperCase(),
+          targetMet: xhr.getResponseHeader("x-target-met") === "true",
+          attempts: Number(xhr.getResponseHeader("x-attempts") ?? 0),
+          elapsedMs: Number(xhr.getResponseHeader("x-elapsed-ms") ?? 0),
+        });
+        return;
+      }
+
+      let detail = xhr.statusText;
+      try {
+        const data = JSON.parse(await (xhr.response as Blob).text());
+        detail = data.detail ?? detail;
+      } catch {
+        // response wasn't JSON - keep statusText
+      }
+      reject(new OptimizeError(detail, xhr.status));
+    };
+
+    xhr.onerror = () => {
+      reject(new OptimizeError("Network error. Check your connection and try again.", 0));
+    };
+
+    xhr.send(body);
   });
-
-  if (!response.ok) {
-    let detail = response.statusText;
-    try {
-      const data = await response.json();
-      detail = data.detail ?? detail;
-    } catch {
-      // response wasn't JSON - keep statusText
-    }
-    throw new OptimizeError(detail, response.status);
-  }
-
-  const blob = await response.blob();
-  return {
-    blob,
-    url: URL.createObjectURL(blob),
-    originalBytes: Number(response.headers.get("x-original-bytes") ?? 0),
-    outputBytes: Number(response.headers.get("x-output-bytes") ?? blob.size),
-    quality: Number(response.headers.get("x-quality") ?? 0),
-    scale: Number(response.headers.get("x-scale") ?? 1),
-    format: response.headers.get("x-format") ?? format.toUpperCase(),
-    targetMet: response.headers.get("x-target-met") === "true",
-    attempts: Number(response.headers.get("x-attempts") ?? 0),
-    elapsedMs: Number(response.headers.get("x-elapsed-ms") ?? 0),
-  };
 }
