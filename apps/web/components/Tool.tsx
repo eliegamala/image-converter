@@ -1,5 +1,6 @@
 "use client";
 
+import { sendGAEvent } from "@next/third-parties/google";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CompareSlider } from "@/components/CompareSlider";
 import { Dropzone } from "@/components/Dropzone";
@@ -200,6 +201,10 @@ export function Tool({
 
   async function handleOptimize() {
     if (!file) return;
+    sendGAEvent("event", "convert_click", {
+      format,
+      has_target_size: targetKB !== null,
+    });
     setStatus("loading");
     setErrorMessage(null);
     setProgress(0);
