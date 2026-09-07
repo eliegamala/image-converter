@@ -13,7 +13,8 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
-from .compression import SUPPORTED_FORMATS, run_optimize_worker, run_recommend_format_worker
+from .compression import SUPPORTED_FORMATS, run_optimize_worker
+from .compression.content_signal import recommend_format
 from .config import ALLOWED_ORIGINS, PROCESS_POOL_WORKERS, RATE_LIMIT
 from .models import HealthResponse, RecommendFormatResponse
 from .security import ImageTooLargeError, InvalidImageError, load_and_validate_image
@@ -57,6 +58,21 @@ app.add_middleware(
     ],
 )
 
+
+@app.middleware("http")
+async def add_timing_allow_origin(request: Request, call_next):
+    # Separate from CORS (Access-Control-*): this specifically unlocks
+    # precise cross-origin Resource Timing API detail (redirectStart,
+    # connectStart, responseStart, encodedBodySize, etc.) for the deployed
+    # frontend's origin, which is otherwise clamped to just start/end time -
+    # without it there's no way to see server-side timing breakdown from the
+    # client at all.
+    response = await call_next(request)
+    origin = request.headers.get("origin")
+    if origin and origin in ALLOWED_ORIGINS:
+        response.headers["Timing-Allow-Origin"] = origin
+    return response
+
 _MEDIA_TYPES = {
     "JPEG": "image/jpeg",
     "PNG": "image/png",
@@ -83,14 +99,19 @@ async def recommend_format_endpoint(
     data = await file.read()
 
     try:
-        load_and_validate_image(data)
+        image = load_and_validate_image(data)
     except ImageTooLargeError as exc:
         raise HTTPException(413, str(exc)) from exc
     except InvalidImageError as exc:
         raise HTTPException(400, str(exc)) from exc
 
-    loop = asyncio.get_running_loop()
-    recommended = await loop.run_in_executor(_executor, run_recommend_format_worker, data)
+    # No ProcessPoolExecutor round trip here (unlike /api/optimize) - the
+    # image is already fully decoded above for validation, and
+    # estimate_complexity's own work (downscale to <=512px + a grayscale
+    # gradient calc) is itself cheap; dispatching to a worker would only add
+    # IPC overhead and force a second full decode of the same file for no
+    # benefit (see apps/api/benchmark.py for the measured before/after).
+    recommended = recommend_format(image)
     return RecommendFormatResponse(recommended_format=recommended)
 
 

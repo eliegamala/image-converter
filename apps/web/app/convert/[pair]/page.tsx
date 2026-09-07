@@ -98,7 +98,6 @@ export default async function ConversionPage({ params }: PageProps) {
             <Tool
               defaultFormat={conversion.to}
               defaultSourceFormat={conversion.from}
-              lockFormat
             />
           </div>
         </div>

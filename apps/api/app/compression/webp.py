@@ -7,8 +7,23 @@ from PIL import Image
 
 from .search import SearchResult, search_quality_scale
 
-PREVIEW_METHOD = 4
-FINAL_METHOD = 6
+# libwebp's method scale is the OPPOSITE direction from AVIF's speed: 0 is
+# fastest, 6 is slowest/most-exhaustive. Measured directly against this
+# codebase's actual search content (see apps/api/benchmark.py and the
+# isolated per-method timings in PR history): methods 3-6 cost 2-4x more
+# than 0-2 for a *quality-95* encode while producing an equal or even
+# slightly larger file (method 6 does not win on size at high quality) -
+# there is no tradeoff being given up by preferring a low method there.
+# Method only earns its cost at lower quality (the binary search's target-
+# size path), where higher methods measured ~10-15% smaller at several
+# times the cost - real, but not worth paying on every preview attempt.
+PREVIEW_METHOD = 2
+# One step up from preview for the single final delivery re-encode (see
+# search.py's docstring on the fast-search/slow-final pattern) - still
+# roughly half the cost of the old value of 6 at every quality level
+# measured, most of which bought nothing at high quality and only a modest
+# size reduction at low quality.
+FINAL_METHOD = 4
 
 
 def _prepare(image: Image.Image) -> Image.Image:

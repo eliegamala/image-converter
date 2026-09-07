@@ -1,5 +1,6 @@
 "use client";
 
+import { sendGAEvent } from "@next/third-parties/google";
 import { useEffect, useRef, useState } from "react";
 import {
   base64ToBytes,
@@ -159,6 +160,9 @@ export function Base64ToImageTool() {
 
   async function downloadAs(targetMime: "image/png" | "image/jpeg" | "image/webp") {
     if (!previewUrl) return;
+    sendGAEvent("event", "conversion_start", {
+      tool_name: `base64_to_${extensionForMime(targetMime)}`,
+    });
     try {
       const blob = await toFormatBlob(previewUrl, targetMime);
       const url = URL.createObjectURL(blob);

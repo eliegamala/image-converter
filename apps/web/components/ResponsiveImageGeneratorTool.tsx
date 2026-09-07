@@ -1,5 +1,6 @@
 "use client";
 
+import { sendGAEvent } from "@next/third-parties/google";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Dropzone } from "@/components/Dropzone";
 import { formatBytes } from "@/lib/format";
@@ -219,6 +220,7 @@ export function ResponsiveImageGeneratorTool() {
 
   async function downloadZip() {
     if (variants.length === 0) return;
+    sendGAEvent("event", "conversion_start", { tool_name: "image_to_responsive_set" });
     setZipping(true);
     try {
       const { default: JSZip } = await import("jszip");

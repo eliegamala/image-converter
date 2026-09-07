@@ -1,6 +1,7 @@
 "use client";
 
 import ImageTracer from "imagetracerjs";
+import { sendGAEvent } from "@next/third-parties/google";
 import { useEffect, useRef, useState } from "react";
 import { CompareSlider } from "@/components/CompareSlider";
 import { Dropzone } from "@/components/Dropzone";
@@ -211,6 +212,7 @@ export function PngToSvgTool() {
 
   function handleDownload() {
     if (!svgUrl) return;
+    sendGAEvent("event", "conversion_start", { tool_name: "png_to_svg" });
     const base = file?.name.replace(/\.png$/i, "") || "converted";
     triggerDownload(svgUrl, `${base}.svg`);
   }

@@ -1,5 +1,6 @@
 "use client";
 
+import { sendGAEvent } from "@next/third-parties/google";
 import { useRef, useState } from "react";
 import { Dropzone } from "@/components/Dropzone";
 import { formatBytes } from "@/lib/format";
@@ -98,6 +99,7 @@ export function ImageToBase64Tool() {
 
   function handleDownload() {
     if (!base64 || !file) return;
+    sendGAEvent("event", "conversion_start", { tool_name: "image_to_base64" });
     const blob = new Blob([base64], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const base = file.name.replace(/\.[^.]+$/, "");

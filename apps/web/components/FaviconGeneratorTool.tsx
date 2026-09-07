@@ -1,5 +1,6 @@
 "use client";
 
+import { sendGAEvent } from "@next/third-parties/google";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Dropzone } from "@/components/Dropzone";
 import {
@@ -252,6 +253,7 @@ export function FaviconGeneratorTool() {
 
   async function downloadZip() {
     if (!icoBlob || icons.length === 0) return;
+    sendGAEvent("event", "conversion_start", { tool_name: "image_to_favicon" });
     setZipping(true);
     try {
       const { default: JSZip } = await import("jszip");

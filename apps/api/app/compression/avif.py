@@ -9,7 +9,12 @@ from PIL import Image
 from .search import SearchResult, search_quality_scale
 
 PREVIEW_SPEED = 10
-FINAL_SPEED = 6
+# aom's speed (cpu-used) scale runs 0 (slowest/best) to 10 (fastest/worst).
+# 6 was measured to cost several extra seconds on constrained CPU for one
+# encode with only a marginal size/quality gain over faster settings - 8
+# keeps a real quality step up from the speed-10 preview pass while cutting
+# that cost substantially (see apps/api/benchmark.py for before/after).
+FINAL_SPEED = 8
 
 
 def _prepare(image: Image.Image) -> Image.Image:

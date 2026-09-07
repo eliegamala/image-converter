@@ -21,7 +21,14 @@ from typing import Callable, Optional
 QUALITY_FLOOR = 40
 QUALITY_MIN = 1
 QUALITY_MAX = 95
-SCALE_STEPS = (1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3)
+# Extended down to 0.1 (from a former floor of 0.3) so a small requested
+# target_bytes on a large source image has room to actually be reached by
+# downscaling further, rather than giving up above-target once 0.3 still
+# doesn't fit at the quality floor. Each extra step here costs at most one
+# single encode attempt (see the loop below - it only binary-searches once
+# some scale's floor fits), so this doesn't meaningfully eat into the
+# attempt/time budget.
+SCALE_STEPS = (1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1)
 TIME_BUDGET_SECONDS = 8.0
 MAX_ATTEMPTS = 40
 

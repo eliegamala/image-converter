@@ -1,5 +1,6 @@
 "use client";
 
+import { sendGAEvent } from "@next/third-parties/google";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Dropzone } from "@/components/Dropzone";
 import { formatBytes } from "@/lib/format";
@@ -145,6 +146,7 @@ export function SvgToPngTool() {
 
   function handleDownload() {
     if (!pngUrl) return;
+    sendGAEvent("event", "conversion_start", { tool_name: "svg_to_png" });
     const base = file?.name.replace(/\.svg$/i, "") || "converted";
     triggerDownload(pngUrl, `${base}.png`);
   }

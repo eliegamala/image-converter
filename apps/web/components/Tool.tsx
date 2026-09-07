@@ -74,9 +74,6 @@ type Status = "idle" | "loading" | "done" | "error";
 interface ToolProps {
   defaultFormat?: ImageFormat;
   defaultSourceFormat?: string;
-  /** Landing pages promise a specific conversion - don't let the
-   * auto-recommendation override that choice, just show it as a hint. */
-  lockFormat?: boolean;
   /** Pre-selects a target size (e.g. landing pages promising "to 100KB")
    * instead of the default "Best Quality" auto mode. */
   defaultTargetKB?: number | null;
@@ -97,7 +94,6 @@ function triggerDownload(url: string, filename: string) {
 export function Tool({
   defaultFormat = "webp",
   defaultSourceFormat = "auto",
-  lockFormat = false,
   defaultTargetKB = null,
   onFileChange,
 }: ToolProps) {
@@ -118,7 +114,6 @@ export function Tool({
 
   const previewUrlRef = useRef<string | null>(null);
   const resultUrlRef = useRef<string | null>(null);
-  const userTouchedFormatRef = useRef(false);
   const progressTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const maxProgressRef = useRef(0);
 
@@ -149,13 +144,16 @@ export function Tool({
       img.onerror = () => setPreviewUnsupported(true);
       img.src = url;
 
+      // Only surfaced as the "recommended" badge on that format's button -
+      // deliberately not auto-applied to `format`. AVIF is very often the
+      // recommendation for photos, but it's much slower to encode than
+      // WebP; silently switching the actual selection to it would mean
+      // most conversions pay that cost without the user having chosen it.
       recommendFormat(newFile).then((rec) => {
-        if (!rec) return;
-        setRecommendedFormat(rec);
-        if (!lockFormat && !userTouchedFormatRef.current) setFormat(rec);
+        if (rec) setRecommendedFormat(rec);
       });
     },
-    [lockFormat, onFileChange]
+    [onFileChange]
   );
 
   useEffect(() => {
@@ -179,7 +177,6 @@ export function Tool({
   }, []);
 
   function selectFormat(value: ImageFormat) {
-    userTouchedFormatRef.current = true;
     setFormat(value);
   }
 
@@ -201,9 +198,13 @@ export function Tool({
 
   async function handleOptimize() {
     if (!file) return;
-    sendGAEvent("event", "convert_click", {
-      format,
-      has_target_size: targetKB !== null,
+    // GA4 slugs match the site's own URL convention (jpeg -> "jpg", see
+    // content/conversions.ts's FORMAT_META) rather than the backend's
+    // "jpeg" format param, so tool_name reads the way people search for
+    // these conversions ("jpg to webp") instead of the internal enum.
+    const slug = (value: string) => (value === "jpeg" ? "jpg" : value);
+    sendGAEvent("event", "conversion_start", {
+      tool_name: `${slug(sourceFormat)}_to_${slug(format)}`,
     });
     setStatus("loading");
     setErrorMessage(null);
@@ -445,6 +446,48 @@ export function Tool({
               Download again
             </a>
           </div>
+
+          {targetKB !== null && !result.targetMet && (
+            <div className="border-signal-before/40 bg-signal-before/10 flex items-start gap-2.5 rounded-lg border px-3 py-2.5 text-sm">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+                className="text-signal-before mt-0.5 shrink-0"
+              >
+                <path
+                  d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <p className="text-ink-muted">
+                Couldn&apos;t reach your {targetKB}KB target - the smallest {result.format} could
+                get this image, even at the lowest quality and size settings, is{" "}
+                {formatBytes(result.outputBytes)}.{" "}
+                {LOSSLESS_FORMATS.has(result.format) ? (
+                  <>
+                    {result.format} can only shrink so far without losing pixels outright; a lossy
+                    format has much more room to compress. Try{" "}
+                    <button
+                      type="button"
+                      onClick={() => selectFormat(recommendedFormat ?? "webp")}
+                      className="text-primary font-medium underline"
+                    >
+                      {OUTPUT_FORMATS.find((f) => f.value === (recommendedFormat ?? "webp"))?.label}
+                    </button>{" "}
+                    instead, or pick a larger target size.
+                  </>
+                ) : (
+                  <>This is close to the physical limit for this image - try a larger target size.</>
+                )}
+              </p>
+            </div>
+          )}
 
           {result.outputBytes > result.originalBytes && (
             <div className="border-signal-before/40 bg-signal-before/10 flex items-start gap-2.5 rounded-lg border px-3 py-2.5 text-sm">

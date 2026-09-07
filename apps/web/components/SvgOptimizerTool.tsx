@@ -1,6 +1,7 @@
 "use client";
 
 import { optimize } from "svgo/browser";
+import { sendGAEvent } from "@next/third-parties/google";
 import { useEffect, useRef, useState } from "react";
 import { CompareSlider } from "@/components/CompareSlider";
 import { Dropzone } from "@/components/Dropzone";
@@ -107,6 +108,7 @@ export function SvgOptimizerTool() {
 
   function downloadOptimized() {
     if (!optimizedUrl || !file) return;
+    sendGAEvent("event", "conversion_start", { tool_name: "svg_optimize" });
     const base = file.name.replace(/\.svg$/i, "");
     triggerDownload(optimizedUrl, `${base}-optimized.svg`);
   }
