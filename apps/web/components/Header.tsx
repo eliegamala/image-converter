@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 
 const TOOLS = [
   { label: "All Converters", href: "/convert" },
+  { label: "Image Enhancer", href: "/image-enhancer" },
   { label: "SVG to PNG", href: "/svg-to-png" },
   { label: "PNG to SVG", href: "/png-to-svg" },
   { label: "Image to Base64", href: "/image-to-base64" },

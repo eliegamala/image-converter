@@ -247,6 +247,57 @@ export default function Home() {
           </Link>
         </section>
 
+        <section className="mx-auto mt-24 w-full max-w-4xl px-6 text-center">
+          <h2 className="font-display text-2xl font-bold sm:text-3xl">Improve Image Quality with AI</h2>
+          <p className="text-ink-muted mt-2">
+            Sharpen, unblur and upscale your photos up to 4x - a real AI model running free in your
+            browser.
+          </p>
+          <ul className="mt-6 flex flex-wrap justify-center gap-2">
+            <li>
+              <Link href="/image-enhancer" className="conversion-pill px-4 py-1.5 text-sm">
+                Image Enhancer
+              </Link>
+            </li>
+            <li>
+              <Link href="/image-upscaler" className="conversion-pill px-4 py-1.5 text-sm">
+                Image Upscaler
+              </Link>
+            </li>
+            <li>
+              <Link href="/unblur-images" className="conversion-pill px-4 py-1.5 text-sm">
+                Unblur Images
+              </Link>
+            </li>
+            <li>
+              <Link href="/increase-image-resolution" className="conversion-pill px-4 py-1.5 text-sm">
+                Increase Image Resolution
+              </Link>
+            </li>
+          </ul>
+          <p className="text-ink-muted mx-auto mt-8 max-w-2xl text-left text-sm leading-relaxed sm:text-center">
+            Beyond format conversion, cloudvertify includes a free AI image enhancer for improving
+            photo quality directly in your browser. It runs a real super-resolution model - not a
+            basic sharpen filter - to reduce mild blur, sharpen detail, and upscale images to 2x or
+            4x their original size. Because everything runs on your device instead of a server,
+            there&apos;s no upload, no account, and no limit on how often you can use it.
+          </p>
+          <p className="text-ink-muted mx-auto mt-4 max-w-2xl text-left text-sm leading-relaxed sm:text-center">
+            It&apos;s useful for the same kinds of images you&apos;d otherwise convert here: a
+            slightly soft phone photo before posting it online, a small product image that needs
+            to look sharp at a larger size, or an old, low-resolution photo you want to enlarge
+            without it turning blocky. See the{" "}
+            <Link href="/image-enhancer" className="text-primary font-medium">
+              image enhancer
+            </Link>{" "}
+            for the full tool, or jump straight to{" "}
+            <Link href="/unblur-images" className="text-primary font-medium">
+              unblurring a photo
+            </Link>{" "}
+            if that&apos;s what brought you here.
+          </p>
+        </section>
+
         <section className="on-dark mt-24 w-full py-20">
           <div className="mx-auto w-full max-w-4xl px-6">
             <Eyebrow>From upload to download</Eyebrow>
