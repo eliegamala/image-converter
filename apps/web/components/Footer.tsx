@@ -4,8 +4,6 @@ import { CONVERSIONS } from "@/content/conversions";
 const POPULAR = CONVERSIONS.slice(0, 5);
 
 const TOOLS_LINKS = [
-  { label: "Image Enhancer", href: "/image-enhancer" },
-  { label: "Image Upscaler", href: "/image-upscaler" },
   { label: "SVG to PNG Converter", href: "/svg-to-png" },
   { label: "PNG to SVG Converter", href: "/png-to-svg" },
   { label: "Image to Base64 Converter", href: "/image-to-base64" },

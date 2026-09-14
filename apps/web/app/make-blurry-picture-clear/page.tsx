@@ -1,19 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/Breadcrumb";
-import { EnhancerTool } from "@/components/EnhancerTool";
 import { FaqAccordion } from "@/components/FaqAccordion";
 import { Footer } from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "Make a Blurry Picture Clear Online – Free & Instant",
+  title: "How to Make a Blurry Picture Clear – What Actually Helps",
   description:
-    "Make a blurry picture clear in a few clicks, for free. Upload your photo, click Enhance, and download a sharper version - no account, no software, no upload to a server.",
+    "Why photos come out blurry, what AI-based sharpening can realistically fix, and practical, honest tips for getting a clearer result.",
   alternates: { canonical: "/make-blurry-picture-clear" },
   openGraph: {
-    title: "Make a Blurry Picture Clear Online – Free & Instant",
+    title: "How to Make a Blurry Picture Clear – What Actually Helps",
     description:
-      "A simple, free way to make a blurry photo clearer - upload, enhance, compare, download. Runs in your browser, nothing installed.",
+      "A practical, honest guide to fixing a blurry photo - what causes blur, what AI enhancement can realistically improve, and what to try first.",
   },
 };
 
@@ -24,57 +23,38 @@ const CAUSES = [
   { title: "Saved or shared at low quality", body: "A photo that's been screenshotted, re-saved, or sent through a messaging app multiple times often loses sharpness to repeated compression, even if the original was fine." },
 ];
 
-const STEPS = [
-  { step: "01", title: "Upload the photo", body: "Drop in your blurry picture - JPG, PNG or WebP." },
-  { step: "02", title: "Click Enhance", body: "The AI model sharpens the image right in your browser, in a few seconds." },
-  { step: "03", title: "Download the result", body: "Drag the slider to compare, then save the clearer version." },
-];
-
 const FAQS = [
   {
-    question: "How do I make a blurry picture clear?",
+    question: "What's the first thing to try with a blurry picture?",
     answer:
-      "Upload it to the tool above, leave \"Enhance Quality\" selected, and click Enhance. An AI model sharpens the image and reduces mild blur automatically - there are no settings to fiddle with. Compare the result with the slider, then download it.",
+      "Check whether you have a better source to start from - a higher-resolution original rather than a screenshot or a copy that's been through a messaging app, or a different shot from the same moment that came out sharper. The starting quality matters more than any enhancement step that follows.",
   },
   {
-    question: "Is this actually free?",
+    question: "Can AI enhancement fix a blurry picture?",
     answer:
-      "Yes, completely - no trial limit, no watermark, no account. It runs using an open-source AI model loaded in your browser, so there's no cost per photo to pass on to you.",
+      "It can meaningfully improve mild-to-moderate blur - a photo that's just a little soft, some motion blur, general low-detail softness - by reconstructing plausible detail rather than just increasing edge contrast the way a basic sharpen filter does. See our unblur images guide for the full technical explanation.",
   },
   {
-    question: "Do I need to install anything?",
-    answer: "No. It works directly in your web browser on both desktop and mobile - nothing to download or install.",
-  },
-  {
-    question: "Will my blurry photo be perfectly sharp afterward?",
+    question: "Will a blurry photo become perfectly sharp?",
     answer:
-      "It depends how blurry it is to start with. Mildly soft or slightly blurry photos usually come out noticeably clearer. Very blurry photos will look somewhat better, but not perfectly sharp - no tool can invent detail that the camera never captured. See our full explanation of what's realistically possible on the unblur images page.",
+      "It depends how blurry it is to start with. Mildly soft or slightly blurry photos can come out noticeably clearer with the right approach. Very blurry photos will look somewhat better at best, not perfectly sharp - no method, AI or otherwise, can invent detail the camera never captured.",
   },
   {
-    question: "Is my photo uploaded somewhere?",
-    answer: "No - it's processed entirely on your own device. The photo you upload never gets sent to a server.",
-  },
-  {
-    question: "Can I also make the picture bigger, not just clearer?",
+    question: "Does making a picture bigger help with blurriness?",
     answer:
-      "Yes - switch to Upscale 2× or Upscale 4× instead of Enhance Quality, and the same AI model will enlarge the image instead of keeping it the same size. See the image upscaler page for more on choosing between them.",
+      "Not on its own - upscaling increases pixel dimensions, it doesn't add sharpness by itself. Sharpening and upscaling are related but different operations; see our image upscaling guide for how they fit together.",
   },
   {
-    question: "What file do I get back?",
-    answer: "A PNG file, which keeps full quality without adding any extra compression on top of what the enhancement produced.",
+    question: "Is there a difference between a blurry photo and a low-resolution one?",
+    answer:
+      "Yes. A low-resolution photo simply has fewer pixels to begin with, which can look soft when displayed larger than its native size. A blurry photo has enough pixels but the detail within them was smeared or never properly focused. Each responds differently to enhancement - see our guide on image resolution for the distinction.",
+  },
+  {
+    question: "Can I fix a blurry picture without any software?",
+    answer:
+      "For minor softness, sometimes reducing the display size (viewing it smaller) makes blur less noticeable, though that's a workaround rather than a fix. For an actual improvement to the file itself, some form of sharpening or AI-based enhancement is needed.",
   },
 ];
-
-const webApplicationJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  name: "cloudvertify Blurry Picture Fixer",
-  applicationCategory: "MultimediaApplication",
-  operatingSystem: "Any (web-based)",
-  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-  description:
-    "Free browser-based tool to make a blurry picture clearer using an AI enhancement model - upload, enhance, compare, download.",
-};
 
 const faqJsonLd = {
   "@context": "https://schema.org",
@@ -98,7 +78,6 @@ const breadcrumbJsonLd = {
 export default function MakeBlurryPictureClearPage() {
   return (
     <div className="flex min-h-screen flex-col">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webApplicationJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
 
@@ -108,50 +87,35 @@ export default function MakeBlurryPictureClearPage() {
             <Breadcrumb items={[{ label: "cloudvertify", href: "/" }, { label: "Make Blurry Picture Clear" }]} />
           </div>
           <h1 className="font-display text-ink text-4xl font-semibold sm:text-5xl">
-            Make a Blurry Picture Clear
+            How to Make a Blurry Picture Clear
           </h1>
           <p className="text-ink/70 mt-4">
-            Got a blurry photo you want to fix? Upload it below, click Enhance, and get a clearer version
-            in a few seconds - free, with no account and nothing installed.
+            A practical, honest look at what actually helps a blurry photo - why pictures come out
+            blurry in the first place, what AI-based sharpening can realistically fix, and what to
+            try before reaching for any tool.
           </p>
-
-          <div id="tool" className="on-light border-border bg-surface mt-10 rounded-2xl border p-6 text-left shadow-xl sm:p-8">
-            <EnhancerTool defaultMode="enhance" />
-          </div>
         </div>
       </div>
 
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center gap-4 px-6 py-16">
         <section className="mx-auto w-full max-w-2xl">
-          <h2 className="font-display mb-4 text-xl">The Simplest Way to Fix a Blurry Photo</h2>
+          <h2 className="font-display mb-4 text-xl">Start With the Best Source You Have</h2>
           <p className="text-ink-muted leading-relaxed">
-            If you&apos;ve got a photo that came out blurry - a photo of a moment you can&apos;t retake -
-            the good news is you don&apos;t need photo editing software or any real skill to try improving
-            it. This tool uses an AI model that sharpens detail and reduces mild blur automatically. There
-            are no sliders to figure out and no settings to get wrong: upload the picture, click Enhance,
-            and see the result.
+            Before reaching for any sharpening technique, the single biggest factor in how good a
+            result you can get is the quality of your starting file. A screenshot of a photo, or a
+            copy that&apos;s been sent through a messaging app (which typically re-compresses
+            images), has already lost detail that no amount of enhancement afterward can restore.
+            If you have the original photo file, or several shots of the same moment, start from
+            whichever is sharpest and least compressed - it makes a real, measurable difference to
+            the result.
           </p>
-        </section>
-
-        <section className="mx-auto mt-12 w-full max-w-2xl">
-          <h2 className="font-display mb-4 text-xl">3 Steps to a Clearer Picture</h2>
-          <div className="mt-6 grid gap-6 sm:grid-cols-3">
-            {STEPS.map((s) => (
-              <div key={s.step}>
-                <div className="font-readout text-primary text-sm">{s.step}</div>
-                <h3 className="mt-2 font-medium">{s.title}</h3>
-                <p className="text-ink-muted mt-2 text-sm leading-relaxed">{s.body}</p>
-              </div>
-            ))}
-          </div>
         </section>
 
         <section className="mx-auto mt-12 w-full max-w-2xl">
           <h2 className="font-display mb-4 text-xl">Why Photos Come Out Blurry</h2>
           <p className="text-ink-muted leading-relaxed">
-            It helps to know why a picture ended up blurry in the first place - not because it changes how
-            you use this tool, but because it sets realistic expectations for how much improvement is
-            possible.
+            It helps to know why a picture ended up blurry in the first place, because it sets
+            realistic expectations for how much improvement is actually possible.
           </p>
           <div className="mt-4 flex flex-col gap-4">
             {CAUSES.map((cause) => (
@@ -164,41 +128,49 @@ export default function MakeBlurryPictureClearPage() {
         </section>
 
         <section className="mx-auto mt-12 w-full max-w-2xl">
-          <h2 className="font-display mb-4 text-xl">What Happens When You Click Enhance</h2>
+          <h2 className="font-display mb-4 text-xl">What AI-Based Sharpening Actually Does</h2>
           <p className="text-ink-muted leading-relaxed">
-            Behind the simple button is a real AI model - not a basic sharpen filter - that runs directly
-            in your browser. It was trained on a large number of sharp and blurry photo pairs, so it has
+            Modern AI-based sharpening uses a trained neural network rather than a basic contrast
+            filter. It&apos;s trained on large numbers of sharp and blurry photo pairs, so it has
             learned what genuinely sharp detail tends to look like, and it uses that knowledge to
-            reconstruct a clearer version of your photo. Because this all happens on your own device, your
-            picture is never uploaded anywhere - it&apos;s as private as opening the file in any other app
-            on your computer or phone.
+            reconstruct a clearer estimate of the original scene - a meaningfully different
+            approach from simply increasing contrast at existing edges, which is what a basic
+            sharpen filter does. See our full explanation of{" "}
+            <Link href="/unblur-images" className="text-primary font-medium">
+              how unblurring works
+            </Link>{" "}
+            for the technical detail.
           </p>
         </section>
 
         <section className="mx-auto mt-12 w-full max-w-2xl">
-          <h2 className="font-display mb-4 text-xl">Sharpening, Enhancing, and Upscaling - What&apos;s the Difference?</h2>
+          <h2 className="font-display mb-4 text-xl">
+            Sharpening, Enhancing, and Upscaling - What&apos;s the Difference?
+          </h2>
           <p className="text-ink-muted leading-relaxed">
-            This page uses <strong>Enhance Quality</strong> by default, which sharpens your photo and keeps
-            it at the same size - the right choice if you just want it to look clearer. If you also need
-            the picture to be bigger (for printing, or to fill a larger space), switch to{" "}
-            <strong>Upscale 2×</strong> or <strong>Upscale 4×</strong> instead, which use the same AI model
-            but keep its enlarged output. Our{" "}
+            These terms get used interchangeably but describe different things. Sharpening and
+            same-size enhancement improve clarity while keeping a photo&apos;s original
+            dimensions. Upscaling increases the pixel dimensions instead, which helps when an
+            image needs to be larger (for printing, or to fill more space) but doesn&apos;t by
+            itself fix blur - a blurry image made bigger is still blurry, just at a larger size.
+            Our{" "}
             <Link href="/image-upscaler" className="text-primary font-medium">
-              image upscaler guide
+              image upscaling guide
             </Link>{" "}
-            covers choosing between 2x and 4x in more detail.
+            covers the 2x vs 4x distinction in more detail.
           </p>
         </section>
 
         <section className="mx-auto mt-12 w-full max-w-2xl">
           <h2 className="font-display mb-4 text-xl">Be Realistic About What&apos;s Possible</h2>
           <p className="text-ink-muted leading-relaxed">
-            A photo that&apos;s only a little soft usually comes back looking genuinely sharp. A photo
-            that&apos;s severely out of focus or badly smeared by motion will look somewhat better, but
-            it&apos;s not going to turn into a crisp, perfectly focused shot - that detail simply
-            wasn&apos;t captured, and no tool can invent it from nothing. Try the tool on your photo and
-            judge the before/after slider for yourself; for most everyday &quot;this came out a bit
-            blurry&quot; photos, the improvement is real and worth it.
+            A photo that&apos;s only a little soft can genuinely come out looking sharp with the
+            right approach. A photo that&apos;s severely out of focus or badly smeared by motion
+            will look somewhat better at best, but it&apos;s not going to turn into a crisp,
+            perfectly focused shot - that detail simply wasn&apos;t captured, and nothing can
+            invent it from nothing. For most everyday &quot;this came out a bit blurry&quot;
+            photos, a real, worthwhile improvement is achievable; for severely damaged or
+            irreplaceable images, it&apos;s worth keeping expectations modest.
           </p>
         </section>
 
@@ -212,13 +184,21 @@ export default function MakeBlurryPictureClearPage() {
             </li>
             <li className="flex gap-2">
               <span className="text-primary">·</span>
-              If you took several shots of the same moment, enhance the sharpest one - it&apos;ll give the best
-              starting point.
+              If you took several shots of the same moment, start from the sharpest one - it gives
+              any sharpening step a better foundation to work from.
             </li>
             <li className="flex gap-2">
               <span className="text-primary">·</span>
-              Zoom into the downloaded result to check the improvement properly, rather than judging from a
-              small preview.
+              Judge results at full size rather than in a small preview, where quality differences
+              are easy to miss.
+            </li>
+            <li className="flex gap-2">
+              <span className="text-primary">·</span>
+              Understand which type of blur you&apos;re dealing with first - our{" "}
+              <Link href="/unblur-images" className="text-primary font-medium">
+                unblur images guide
+              </Link>{" "}
+              breaks down motion blur versus focus blur versus general softness.
             </li>
           </ul>
         </section>
@@ -229,7 +209,7 @@ export default function MakeBlurryPictureClearPage() {
         </section>
 
         <section className="mx-auto mt-8 w-full max-w-2xl">
-          <h2 className="font-display mb-4 text-xl">More Ways to Improve Your Photos</h2>
+          <h2 className="font-display mb-4 text-xl">More Reading</h2>
           <ul className="flex flex-wrap gap-2">
             <li>
               <Link href="/unblur-images" className="conversion-pill px-4 py-1.5 text-sm">
@@ -238,7 +218,7 @@ export default function MakeBlurryPictureClearPage() {
             </li>
             <li>
               <Link href="/image-enhancer" className="conversion-pill px-4 py-1.5 text-sm">
-                Image Enhancer
+                Image Enhancer Guide
               </Link>
             </li>
             <li>
@@ -246,27 +226,17 @@ export default function MakeBlurryPictureClearPage() {
                 Image Upscaler
               </Link>
             </li>
-            <li>
-              <Link href="/image-to-base64" className="conversion-pill px-4 py-1.5 text-sm">
-                Image to Base64 Converter
-              </Link>
-            </li>
-            <li>
-              <Link href="/convert" className="conversion-pill px-4 py-1.5 text-sm">
-                View all converters
-              </Link>
-            </li>
           </ul>
         </section>
 
         <section className="mx-auto mt-8 w-full max-w-2xl text-center">
-          <h2 className="font-display mb-3 text-xl">Try it on your photo</h2>
+          <h2 className="font-display mb-3 text-xl">Need to convert an image right now?</h2>
           <p className="text-ink-muted mb-6 leading-relaxed">
-            It only takes a few seconds, and there&apos;s nothing to lose - it&apos;s free and your photo stays on
-            your device.
+            cloudvertify&apos;s free image format converters are ready to use today - no account,
+            nothing installed.
           </p>
-          <Link href="#tool" className="bg-primary text-primary-ink inline-block rounded-full px-6 py-3 font-medium">
-            Make My Picture Clear
+          <Link href="/convert" className="bg-primary text-primary-ink inline-block rounded-full px-6 py-3 font-medium">
+            View All Converters
           </Link>
         </section>
       </main>
